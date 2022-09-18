@@ -144,13 +144,6 @@ cython_debug/
 .idea
 .DS_Store
 
-# local debugging
-.disag_results/
 
-# simulation results
-simulation_results/
-
-# Statistical simulation directories
-tmp/
 data/
-output/
+models/

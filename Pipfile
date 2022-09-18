@@ -1,6 +1,9 @@
 [packages]
 scikit-learn = "==0.22"
 shap = "*"
+ipykernel = "*"
+matplotlib = "*"
+seaborn = "*"
 
 [dev-packages]
 autopep8 = "*"

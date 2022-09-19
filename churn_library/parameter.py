@@ -1,4 +1,4 @@
-"""Module to deal with environment variables definitions and parse their values"""
+"""Module to handle environment variables definitions and parse their values"""
 import os
 
 

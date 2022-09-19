@@ -1,4 +1,5 @@
 """Main script to execute the churn library."""
+import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
@@ -11,6 +12,7 @@ def main():
     """Main function when the library is issued via command line"""
 
     sns.set()
+    plt.style.use("ggplot")
 
     np_seed = parameter.get_env("NP_SEED")
     np.random.seed(np_seed)

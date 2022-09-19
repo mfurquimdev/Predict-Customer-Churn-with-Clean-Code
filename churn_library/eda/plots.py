@@ -6,9 +6,6 @@ import numpy as np
 import seaborn as sns
 
 
-plt.style.use("ggplot")
-
-
 def plot_correlation(df, image_folder):
     df = df.rename(
         columns={

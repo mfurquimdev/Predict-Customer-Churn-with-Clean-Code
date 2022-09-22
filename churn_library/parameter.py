@@ -25,10 +25,28 @@ def get_env(option):
             )
         )
 
+    def random_state():
+        return int(
+            os.getenv(
+                "RANDOM_STATE",
+                "42",
+            )
+        )
+
+    def test_size():
+        return float(
+            os.getenv(
+                "TEST_SIZE",
+                "0.3",
+            )
+        )
+
     options = {
         "PATH_TO_IMAGE_FOLDER": path_to_image_folder,
         "PATH_TO_DATA_FOLDER": path_to_data_folder,
         "NP_SEED": np_seed,
+        "RANDOM_STATE": random_state,
+        "TEST_SIZE": test_size,
     }
 
     return options[option]()

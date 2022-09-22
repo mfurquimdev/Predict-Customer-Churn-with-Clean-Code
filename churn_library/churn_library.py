@@ -118,6 +118,25 @@ def perform_feature_engineering(
               y_train: y training data
               y_test: y testing data
     """
+    # fmt: off
+    keep_cols = [
+        'Customer_Age', 'Dependent_count', 'Months_on_book', 'Total_Relationship_Count', 'Months_Inactive_12_mon',
+        'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal', 'Avg_Open_To_Buy', 'Total_Amt_Chng_Q4_Q1',
+        'Total_Trans_Amt', 'Total_Trans_Ct', 'Total_Ct_Chng_Q4_Q1', 'Avg_Utilization_Ratio', 'Gender_Churn',
+        'Education_Level_Churn', 'Marital_Status_Churn', 'Income_Category_Churn', 'Card_Category_Churn'
+    ]
+    # fmt: on
+
+    X = pd.DataFrame()
+
+    X[keep_cols] = df[keep_cols]
+    y = df["Churn"]
+
+    random_state = parameter.get_env("RANDOM_STATE")
+    test_size = parameter.get_env("TEST_SIZE")
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+
+    return X_train, X_test, y_train, y_test
 
 
 def classification_report_image(

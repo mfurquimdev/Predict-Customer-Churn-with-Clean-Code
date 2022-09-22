@@ -81,7 +81,25 @@ def encoder_helper(
     Output:
             df: pandas dataframe with new columns for
     """
-    pass
+
+    def encoded_column(_df, col):
+        df = _df.copy(deep=True)
+
+        groups = df.groupby(col).mean()["Churn"]
+
+        lst = []
+        for val in df[col]:
+            lst.append(groups.loc[val])
+
+        df[f"{col}_Churn"] = lst
+
+        return df
+
+    df = encoded_column(df, "Gender")
+    df = encoded_column(df, "Education_Level")
+    df = encoded_column(df, "Marital_Status")
+    df = encoded_column(df, "Income_Category")
+    df = encoded_column(df, "Card_Category")
 
 
 def perform_feature_engineering(

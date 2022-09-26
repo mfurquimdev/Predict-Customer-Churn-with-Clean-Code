@@ -1,6 +1,9 @@
 """Module to handle environment variables definitions and parse their values"""
 import os
 
+from .exceptions import WrongParameter
+from .logger import logger
+
 
 def get_env(option):
     """Get and parse environment variables data."""
@@ -34,12 +37,15 @@ def get_env(option):
         )
 
     def test_size():
-        return float(
-            os.getenv(
-                "TEST_SIZE",
-                "0.3",
-            )
-        )
+        test_size = float(os.getenv("TEST_SIZE", "0.3"))
+        logger.debug(f"test_size = {test_size}")
+
+        if test_size >= 1 or test_size <= 0:
+            message = f"TEST_SIZE is {test_size} but should be between 0 and 1, non-inclusive"
+            logger.error(message)
+            raise WrongParameter(message)
+
+        return test_size
 
     options = {
         "PATH_TO_IMAGE_FOLDER": path_to_image_folder,

@@ -19,8 +19,11 @@ from .eda import plot_correlation
 from .eda import plot_histogram
 from .eda import plot_marital_status_histogram
 from .eda import plot_total_tras_ct
+from .logger import logger
+from .utils import display_info
 
 
+@display_info
 def import_data(
     csv_name,
 ):
@@ -36,12 +39,14 @@ def import_data(
     path_to_data_folder = parameter.get_env("PATH_TO_DATA_FOLDER")
     path_to_csv = os.path.join(path_to_data_folder, csv_name)
     df = pd.read_csv(path_to_csv, index_col=0)
+    logger.info(f"loaded data of shape {df.shape} from {csv_name}")
 
     df["Churn"] = df["Attrition_Flag"].apply(lambda val: 0 if val == "Existing Customer" else 1)
 
     return df
 
 
+@display_info
 def perform_eda(
     df,
 ):
@@ -62,12 +67,14 @@ def perform_eda(
     plot_marital_status_histogram(df, image_folder)
     plot_total_tras_ct(df, image_folder)
     plot_correlation(df, image_folder)
+    logger.info(f"saved images on {image_folder}")
 
 
+@display_info
 def encoder_helper(
     df,
     category_list,
-    response,
+    response=None,
 ):
     """
     Helper function to turn each categorical column into a new column with
@@ -98,12 +105,15 @@ def encoder_helper(
     for col in category_list:
         df = encode_column(df, col)
 
+    logger.info(f"encoded columns {category_list}")
+
     return df
 
 
+@display_info
 def perform_feature_engineering(
     df,
-    response,
+    response=None,
 ):
     """
     Helper function to perform feature engineer on DataFrame df.
@@ -136,9 +146,14 @@ def perform_feature_engineering(
     test_size = parameter.get_env("TEST_SIZE")
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
+    logger.info(
+        f"split data set into train and test with random state = {random_state} and test size = {test_size*100}%"
+    )
+
     return X_train, X_test, y_train, y_test
 
 
+@display_info
 def classification_report_image(
     y_train,
     y_test,
@@ -162,9 +177,21 @@ def classification_report_image(
     Output:
              None
     """
-    pass
+    # scores
+    logger.info("random forest results")
+    logger.info("test results")
+    logger.info(classification_report(y_test, y_test_preds_rf))
+    logger.info("train results")
+    logger.info(classification_report(y_train, y_train_preds_rf))
+
+    logger.info("logistic regression results")
+    logger.info("test results")
+    logger.info(classification_report(y_test, y_test_preds_lr))
+    logger.info("train results")
+    logger.info(classification_report(y_train, y_train_preds_lr))
 
 
+@display_info
 def feature_importance_plot(
     model,
     X_data,
@@ -184,6 +211,7 @@ def feature_importance_plot(
     pass
 
 
+@display_info
 def train_models(
     X_train,
     X_test,
@@ -201,4 +229,36 @@ def train_models(
     Output:
               None
     """
-    pass
+    # grid search
+    random_state = parameter.get_env("RANDOM_STATE")
+    rfc = RandomForestClassifier(random_state=random_state)
+    # Use a different solver if the default 'lbfgs' fails to converge
+    # Reference: https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+    lrc = LogisticRegression(solver="lbfgs", max_iter=3000)
+
+    param_grid = {
+        "n_estimators": [200, 500],
+        "max_features": ["auto", "sqrt"],
+        "max_depth": [4, 5, 100],
+        "criterion": ["gini", "entropy"],
+    }
+
+    cv_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv=5)
+    cv_rfc.fit(X_train, y_train)
+
+    lrc.fit(X_train, y_train)
+
+    y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
+    y_test_preds_rf = cv_rfc.best_estimator_.predict(X_test)
+
+    y_train_preds_lr = lrc.predict(X_train)
+    y_test_preds_lr = lrc.predict(X_test)
+
+    classification_report_image(
+        y_train,
+        y_test,
+        y_train_preds_lr,
+        y_train_preds_rf,
+        y_test_preds_lr,
+        y_test_preds_rf,
+    )

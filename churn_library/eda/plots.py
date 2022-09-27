@@ -1,4 +1,4 @@
-"""This module defines helper functions for plotting the data"""
+"""This module defines helper functions exploratory data analysis and for plotting the data"""
 import os
 
 import matplotlib.pyplot as plt

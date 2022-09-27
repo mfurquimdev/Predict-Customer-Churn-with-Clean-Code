@@ -8,7 +8,6 @@ import shap
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
-from sklearn.metrics import plot_roc_curve
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
@@ -20,6 +19,7 @@ from .eda import plot_histogram
 from .eda import plot_marital_status_histogram
 from .eda import plot_total_tras_ct
 from .logger import logger
+from .roc import plot_lrc_rfc_roc_curve
 from .utils import display_info
 
 
@@ -177,7 +177,8 @@ def classification_report_image(
     Output:
              None
     """
-    # scores
+    # https://stackoverflow.com/questions/28200786/how-to-plot-scikit-learn-classification-report
+    
     logger.info("random forest results")
     logger.info("test results")
     logger.info(classification_report(y_test, y_test_preds_rf))
@@ -208,6 +209,26 @@ def feature_importance_plot(
     Output:
              None
     """
+    # Calculate feature importances
+    importances = model.best_estimator_.feature_importances_
+    # Sort feature importances in descending order
+    indices = np.argsort(importances)[::-1]
+
+    # Rearrange feature names so they match the sorted feature importances
+    names = [X.columns[i] for i in indices]
+
+    # Create plot
+    plt.figure(figsize=(20, 5))
+
+    # Create plot title
+    plt.title("Feature Importance")
+    plt.ylabel("Importance")
+
+    # Add bars
+    plt.bar(range(X.shape[1]), importances[indices])
+
+    # Add feature names as x-axis labels
+    plt.xticks(range(X.shape[1]), names, rotation=90)
     pass
 
 
@@ -262,3 +283,8 @@ def train_models(
         y_test_preds_lr,
         y_test_preds_rf,
     )
+
+    image_folder = parameter.get_env("PATH_TO_IMAGE_FOLDER")
+    Path(image_folder).mkdir(parents=True, exist_ok=True)
+
+    plot_lrc_rfc_roc_curve(image_folder, lrc, cv_rfc.best_estimator, _X_test, y_test)

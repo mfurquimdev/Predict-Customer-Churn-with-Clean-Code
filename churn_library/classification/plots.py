@@ -6,6 +6,9 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
+from ..logger import logger
+from ..utils import display_info
+
 
 def show_values(pc, fmt="%.2f", **kw):
     """
@@ -105,6 +108,7 @@ def heatmap(
     fig.set_size_inches(cm2inch(figure_width, figure_height))
 
 
+@display_info
 def plot_classification_report(classification_report, title="Classification report ", cmap="RdBu"):
     """
     Plot scikit-learn classification report.
@@ -117,23 +121,26 @@ def plot_classification_report(classification_report, title="Classification repo
     support = []
     class_names = []
     for line in lines[2 : (len(lines) - 2)]:
-        t = line.strip().split()
+        logger.info(f"line: {line}")
+        t = [l for l in line.strip().split("  ") if l]
         if len(t) < 2:
             continue
         classes.append(t[0])
+        logger.info(f"classes: {classes}")
         v = [float(x) for x in t[1 : len(t) - 1]]
+        logger.info(f"v: {v}")
         support.append(int(t[-1]))
+        logger.info(f"support: {support}")
         class_names.append(t[0])
-        print(v)
         plotMat.append(v)
 
-    print("plotMat: {0}".format(plotMat))
-    print("support: {0}".format(support))
+    logger.info(f"plotMat: {plotMat}")
+    logger.info(f"support: {support}")
 
     xlabel = "Metrics"
     ylabel = "Classes"
     xticklabels = ["Precision", "Recall", "F1-score"]
-    yticklabels = ["{0} ({1})".format(class_names[idx], sup) for idx, sup in enumerate(support)]
+    yticklabels = [f"{class_names[idx]} ({sup})" for idx, sup in enumerate(support)]
     figure_width = 25
     figure_height = len(class_names) + 7
     correct_orientation = False

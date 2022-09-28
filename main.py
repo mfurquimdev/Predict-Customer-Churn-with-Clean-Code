@@ -8,6 +8,7 @@ from churn_library import import_data
 from churn_library import parameter
 from churn_library import perform_eda
 from churn_library import perform_feature_engineering
+from churn_library import train_models
 
 
 def main():
@@ -33,6 +34,7 @@ def main():
     ]
     df = encoder_helper(df, category_list)
     X_train, X_test, y_train, y_test = perform_feature_engineering(df)
+    train_models(X_train, X_test, y_train, y_test)
 
 
 if __name__ == "__main__":

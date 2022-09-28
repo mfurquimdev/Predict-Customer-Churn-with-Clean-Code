@@ -20,6 +20,12 @@ def get_env(option):
             os.path.join("images", "eda"),
         )
 
+    def path_to_result_image_folder():
+        return os.getenv(
+            "PATH_TO_RESULT_IMAGE_FOLDER",
+            os.path.join("images", "results"),
+        )
+
     def np_seed():
         return int(
             os.getenv(
@@ -50,6 +56,7 @@ def get_env(option):
     options = {
         "PATH_TO_IMAGE_FOLDER": path_to_image_folder,
         "PATH_TO_DATA_FOLDER": path_to_data_folder,
+        "PATH_TO_RESULT_IMAGE_FOLDER": path_to_result_image_folder,
         "NP_SEED": np_seed,
         "RANDOM_STATE": random_state,
         "TEST_SIZE": test_size,

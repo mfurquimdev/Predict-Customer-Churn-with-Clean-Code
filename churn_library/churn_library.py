@@ -6,6 +6,7 @@ import joblib
 import pandas as pd
 import shap
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
@@ -13,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
 
 from . import parameter
+from .classification import plot_classification_report
 from .eda import plot_churn_histogram
 from .eda import plot_correlation
 from .eda import plot_histogram
@@ -177,19 +179,25 @@ def classification_report_image(
     Output:
              None
     """
-    # https://stackoverflow.com/questions/28200786/how-to-plot-scikit-learn-classification-report
-    
-    logger.info("random forest results")
-    logger.info("test results")
-    logger.info(classification_report(y_test, y_test_preds_rf))
-    logger.info("train results")
-    logger.info(classification_report(y_train, y_train_preds_rf))
+    # plot_classification_report(
+    #     classification_report(y_test, y_test_preds_rf),
+    #     title="Random Forest Classification Report Test",
+    # )
 
-    logger.info("logistic regression results")
-    logger.info("test results")
-    logger.info(classification_report(y_test, y_test_preds_lr))
-    logger.info("train results")
-    logger.info(classification_report(y_train, y_train_preds_lr))
+    # plot_classification_report(
+    #     classification_report(y_train, y_train_preds_rf),
+    #     title="Random Forest Classification Report Train",
+    # )
+
+    # plot_classification_report(
+    #     classification_report(y_test, y_test_preds_lr),
+    #     title="Logistic Regression Classification Report Test",
+    # )
+
+    # plot_classification_report(
+    #     classification_report(y_train, y_train_preds_lr),
+    #     title="Logistic Regression Classification Report Train",
+    # )
 
 
 @display_info
@@ -252,22 +260,37 @@ def train_models(
     """
     # grid search
     random_state = parameter.get_env("RANDOM_STATE")
-    rfc = RandomForestClassifier(random_state=random_state)
-    # Use a different solver if the default 'lbfgs' fails to converge
-    # Reference: https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
-    lrc = LogisticRegression(solver="lbfgs", max_iter=3000)
 
-    param_grid = {
-        "n_estimators": [200, 500],
-        "max_features": ["auto", "sqrt"],
-        "max_depth": [4, 5, 100],
-        "criterion": ["gini", "entropy"],
-    }
+    rfc_path = Path("rfc.pkl")
+    lrc_path = Path("lrc.pkl")
+    cv_rfc_path = Path("cv_rfc.pkl")
 
-    cv_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv=5)
-    cv_rfc.fit(X_train, y_train)
+    if rfc_path.is_file() and lrc_path.is_file() and cv_rfc_path.is_file():
+        rfc = joblib.load("rfc.pkl")
+        lrc = joblib.load("lrc.pkl")
+        cv_rfc = joblib.load("cv_rfc.pkl")
 
-    lrc.fit(X_train, y_train)
+    else:
+        rfc = RandomForestClassifier(random_state=random_state)
+        # Use a different solver if the default 'lbfgs' fails to converge
+        # Reference: https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+        lrc = LogisticRegression(solver="lbfgs", max_iter=3000)
+
+        param_grid = {
+            "n_estimators": [200, 500],
+            "max_features": ["auto", "sqrt"],
+            "max_depth": [4, 5, 100],
+            "criterion": ["gini", "entropy"],
+        }
+
+        cv_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv=5)
+        cv_rfc.fit(X_train, y_train)
+
+        lrc.fit(X_train, y_train)
+
+        joblib.dump(rfc, "rfc.pkl")
+        joblib.dump(lrc, "lrc.pkl")
+        joblib.dump(cv_rfc, "cv_rfc.pkl")
 
     y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
     y_test_preds_rf = cv_rfc.best_estimator_.predict(X_test)
@@ -284,7 +307,7 @@ def train_models(
         y_test_preds_rf,
     )
 
-    image_folder = parameter.get_env("PATH_TO_IMAGE_FOLDER")
+    image_folder = parameter.get_env("PATH_TO_RESULT_IMAGE_FOLDER")
     Path(image_folder).mkdir(parents=True, exist_ok=True)
 
-    plot_lrc_rfc_roc_curve(image_folder, lrc, cv_rfc.best_estimator, _X_test, y_test)
+    plot_lrc_rfc_roc_curve(image_folder, lrc, cv_rfc.best_estimator_, X_test, y_test)

@@ -260,15 +260,22 @@ def train_models(
     """
     # grid search
     random_state = parameter.get_env("RANDOM_STATE")
+    path_to_models = parameter.get_env("PATH_TO_MODELS")
+    path_to_dir = Path(path_to_models)
+    path_to_dir.mkdir(parents=True, exist_ok=True)
 
-    rfc_path = Path("rfc.pkl")
-    lrc_path = Path("lrc.pkl")
-    cv_rfc_path = Path("cv_rfc.pkl")
+    rfc_file = "rfc.pkl"
+    lrc_file = "lrc.pkl"
+    cv_rfc_file = "cv_rfc.pkl"
+
+    rfc_path = path_to_dir.joinpath(rfc_file)
+    lrc_path = path_to_dir.joinpath(lrc_file)
+    cv_rfc_path = path_to_dir.joinpath(cv_rfc_file)
 
     if rfc_path.is_file() and lrc_path.is_file() and cv_rfc_path.is_file():
-        rfc = joblib.load("rfc.pkl")
-        lrc = joblib.load("lrc.pkl")
-        cv_rfc = joblib.load("cv_rfc.pkl")
+        rfc = joblib.load(rfc_path)
+        lrc = joblib.load(lrc_path)
+        cv_rfc = joblib.load(cv_rfc_path)
 
     else:
         rfc = RandomForestClassifier(random_state=random_state)
@@ -288,9 +295,9 @@ def train_models(
 
         lrc.fit(X_train, y_train)
 
-        joblib.dump(rfc, "rfc.pkl")
-        joblib.dump(lrc, "lrc.pkl")
-        joblib.dump(cv_rfc, "cv_rfc.pkl")
+        joblib.dump(rfc, rfc_path)
+        joblib.dump(lrc, lrc_path)
+        joblib.dump(cv_rfc, cv_rfc_path)
 
     y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
     y_test_preds_rf = cv_rfc.best_estimator_.predict(X_test)

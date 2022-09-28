@@ -42,6 +42,12 @@ def get_env(option):
             )
         )
 
+    def path_to_models():
+        return os.getenv(
+            "PATH_TO_MODELS",
+            "models",
+        )
+
     def test_size():
         test_size = float(os.getenv("TEST_SIZE", "0.3"))
         logger.debug(f"test_size = {test_size}")
@@ -57,6 +63,7 @@ def get_env(option):
         "PATH_TO_IMAGE_FOLDER": path_to_image_folder,
         "PATH_TO_DATA_FOLDER": path_to_data_folder,
         "PATH_TO_RESULT_IMAGE_FOLDER": path_to_result_image_folder,
+        "PATH_TO_MODELS": path_to_models,
         "NP_SEED": np_seed,
         "RANDOM_STATE": random_state,
         "TEST_SIZE": test_size,

@@ -4,22 +4,22 @@ from pathlib import Path
 
 import joblib
 import pandas as pd
-import shap
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
 
 from . import parameter
-from .classification import plot_classification_report
+from .classification import plot_report
 from .eda import plot_churn_histogram
 from .eda import plot_correlation
 from .eda import plot_histogram
 from .eda import plot_marital_status_histogram
 from .eda import plot_total_tras_ct
+from .feature_importance import explainer_plot
+from .feature_importance import feature_importance_plot
 from .logger import logger
 from .roc import plot_lrc_rfc_roc_curve
 from .utils import display_info
@@ -157,6 +157,7 @@ def perform_feature_engineering(
 
 @display_info
 def classification_report_image(
+    image_folder,
     y_train,
     y_test,
     y_train_preds_lr,
@@ -169,6 +170,8 @@ def classification_report_image(
     in images folder
 
     Input:
+
+            image_folder: directory to save plot
             y_train: training response values
             y_test:  test response values
             y_train_preds_lr: training predictions from logistic regression
@@ -179,65 +182,12 @@ def classification_report_image(
     Output:
              None
     """
-    # plot_classification_report(
-    #     classification_report(y_test, y_test_preds_rf),
-    #     title="Random Forest Classification Report Test",
-    # )
 
-    # plot_classification_report(
-    #     classification_report(y_train, y_train_preds_rf),
-    #     title="Random Forest Classification Report Train",
-    # )
+    name = "Random Forest"
+    plot_report(image_folder, name, y_train, y_test, y_test_preds_rf, y_train_preds_rf)
 
-    # plot_classification_report(
-    #     classification_report(y_test, y_test_preds_lr),
-    #     title="Logistic Regression Classification Report Test",
-    # )
-
-    # plot_classification_report(
-    #     classification_report(y_train, y_train_preds_lr),
-    #     title="Logistic Regression Classification Report Train",
-    # )
-
-
-@display_info
-def feature_importance_plot(
-    model,
-    X_data,
-    output_path,
-):
-    """
-    Creates and stores the feature importances in path
-
-    Input:
-            model: model object containing feature_importances_
-            X_data: pandas dataframe of X values
-            output_path: path to store the figure
-
-    Output:
-             None
-    """
-    # Calculate feature importances
-    importances = model.best_estimator_.feature_importances_
-    # Sort feature importances in descending order
-    indices = np.argsort(importances)[::-1]
-
-    # Rearrange feature names so they match the sorted feature importances
-    names = [X.columns[i] for i in indices]
-
-    # Create plot
-    plt.figure(figsize=(20, 5))
-
-    # Create plot title
-    plt.title("Feature Importance")
-    plt.ylabel("Importance")
-
-    # Add bars
-    plt.bar(range(X.shape[1]), importances[indices])
-
-    # Add feature names as x-axis labels
-    plt.xticks(range(X.shape[1]), names, rotation=90)
-    pass
+    name = "Logistic Regression"
+    plot_report(image_folder, name, y_train, y_test, y_test_preds_lr, y_train_preds_lr)
 
 
 @display_info
@@ -305,7 +255,11 @@ def train_models(
     y_train_preds_lr = lrc.predict(X_train)
     y_test_preds_lr = lrc.predict(X_test)
 
+    image_folder = parameter.get_env("PATH_TO_RESULT_IMAGE_FOLDER")
+    Path(image_folder).mkdir(parents=True, exist_ok=True)
+
     classification_report_image(
+        image_folder,
         y_train,
         y_test,
         y_train_preds_lr,
@@ -314,7 +268,6 @@ def train_models(
         y_test_preds_rf,
     )
 
-    image_folder = parameter.get_env("PATH_TO_RESULT_IMAGE_FOLDER")
-    Path(image_folder).mkdir(parents=True, exist_ok=True)
-
     plot_lrc_rfc_roc_curve(image_folder, lrc, cv_rfc.best_estimator_, X_test, y_test)
+    feature_importance_plot(cv_rfc, X_test, image_folder)
+    explainer_plot(cv_rfc, X_test, image_folder)

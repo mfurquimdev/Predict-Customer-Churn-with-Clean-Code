@@ -32,8 +32,11 @@ def main():
         "Income_Category",
         "Card_Category",
     ]
+
     df = encoder_helper(df, category_list)
+
     X_train, X_test, y_train, y_test = perform_feature_engineering(df)
+
     train_models(X_train, X_test, y_train, y_test)
 
 

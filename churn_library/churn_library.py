@@ -12,17 +12,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
 
 from . import parameter
-from .classification import plot_report
-from .eda import plot_churn_histogram
-from .eda import plot_correlation
-from .eda import plot_histogram
-from .eda import plot_marital_status_histogram
-from .eda import plot_total_tras_ct
-from .feature_importance import explainer_plot
-from .feature_importance import feature_importance_plot
 from .logger import logger
-from .roc import plot_lrc_rfc_roc_curve
+from .plots import plot_churn_histogram
+from .plots import plot_correlation
+from .plots import plot_feature_importance
+from .plots import plot_histogram
+from .plots import plot_lrc_rfc_roc_curve
+from .plots import plot_marital_status_histogram
+from .plots import plot_report
+from .plots import plot_total_trans_ct
 from .utils import display_info
+
+# from .plots import explainer_plot
 
 
 @display_info
@@ -67,7 +68,7 @@ def perform_eda(
     plot_churn_histogram(df, image_folder)
     plot_histogram(df, "Customer_Age", image_folder)
     plot_marital_status_histogram(df, image_folder)
-    plot_total_tras_ct(df, image_folder)
+    plot_total_trans_ct(df, image_folder)
     plot_correlation(df, image_folder)
     logger.info(f"saved images on {image_folder}")
 
@@ -90,8 +91,10 @@ def encoder_helper(
     Output:
             df: pandas dataframe with new columns for
     """
+    logger.info(f"encoding columns {category_list}")
 
     def encode_column(_df, col):
+        logger.debug(f"encoding column {col}")
         df = _df.copy(deep=True)
 
         groups = df.groupby(col).mean()["Churn"]
@@ -100,6 +103,7 @@ def encoder_helper(
         for val in df[col]:
             lst.append(groups.loc[val])
 
+        logger.debug(f"encoding column {col}: {lst}")
         df[f"{col}_Churn"] = lst
 
         return df
@@ -130,6 +134,8 @@ def perform_feature_engineering(
               y_train: y training data
               y_test: y testing data
     """
+    logger.info("perform feature engineering")
+
     # fmt: off
     keep_cols = [
         'Customer_Age', 'Dependent_count', 'Months_on_book', 'Total_Relationship_Count', 'Months_Inactive_12_mon',
@@ -146,10 +152,12 @@ def perform_feature_engineering(
 
     random_state = parameter.get_env("RANDOM_STATE")
     test_size = parameter.get_env("TEST_SIZE")
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
     logger.info(
-        f"split data set into train and test with random state = {random_state} and test size = {test_size*100}%"
+        f"Data set split into {(1-test_size)*100}% train ({len(y_train)}) "
+        f"and {test_size*100}% test ({len(y_test)}) with random state = {random_state}"
     )
 
     return X_train, X_test, y_train, y_test
@@ -182,6 +190,7 @@ def classification_report_image(
     Output:
              None
     """
+    logger.info("classification report image")
 
     name = "Random Forest"
     plot_report(image_folder, name, y_train, y_test, y_test_preds_rf, y_train_preds_rf)
@@ -208,6 +217,8 @@ def train_models(
     Output:
               None
     """
+    logger.info("train models")
+
     # grid search
     random_state = parameter.get_env("RANDOM_STATE")
     path_to_models = parameter.get_env("PATH_TO_MODELS")
@@ -223,14 +234,17 @@ def train_models(
     cv_rfc_path = path_to_dir.joinpath(cv_rfc_file)
 
     if rfc_path.is_file() and lrc_path.is_file() and cv_rfc_path.is_file():
+        logger.info(f"Models found under {path_to_models}")
+
         rfc = joblib.load(rfc_path)
         lrc = joblib.load(lrc_path)
         cv_rfc = joblib.load(cv_rfc_path)
 
     else:
+        logger.debug("Creating Random Forest Classifier")
         rfc = RandomForestClassifier(random_state=random_state)
-        # Use a different solver if the default 'lbfgs' fails to converge
-        # Reference: https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
+
+        logger.debug("Creating Logistic Regression")
         lrc = LogisticRegression(solver="lbfgs", max_iter=3000)
 
         param_grid = {
@@ -240,23 +254,36 @@ def train_models(
             "criterion": ["gini", "entropy"],
         }
 
+        logger.debug("Creating Grid Search CV with Random Forest Classifier as the estimator")
         cv_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv=5)
+
+        logger.debug("Running Grid Search CV")
         cv_rfc.fit(X_train, y_train)
 
+        logger.debug("Running Logistic Regression")
         lrc.fit(X_train, y_train)
 
+        logger.info(f"Saving models under {path_to_models}")
         joblib.dump(rfc, rfc_path)
         joblib.dump(lrc, lrc_path)
         joblib.dump(cv_rfc, cv_rfc_path)
 
+    logger.debug("Running Random Forest Classifier prediction on train data")
     y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
+
+    logger.debug("Running Random Forest Classifier prediction on test data")
     y_test_preds_rf = cv_rfc.best_estimator_.predict(X_test)
 
+    logger.debug("Running Logistic Regression prediction on train data")
     y_train_preds_lr = lrc.predict(X_train)
+
+    logger.debug("Running Logistic Regression prediction on test data")
     y_test_preds_lr = lrc.predict(X_test)
 
     image_folder = parameter.get_env("PATH_TO_RESULT_IMAGE_FOLDER")
     Path(image_folder).mkdir(parents=True, exist_ok=True)
+
+    logger.info(f"Using {image_folder} directory to save result images")
 
     classification_report_image(
         image_folder,
@@ -269,5 +296,5 @@ def train_models(
     )
 
     plot_lrc_rfc_roc_curve(image_folder, lrc, cv_rfc.best_estimator_, X_test, y_test)
-    feature_importance_plot(cv_rfc, X_test, image_folder)
-    explainer_plot(cv_rfc, X_test, image_folder)
+    plot_feature_importance(cv_rfc, X_test, image_folder)
+    # explainer_plot(cv_rfc, X_test, image_folder)

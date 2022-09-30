@@ -1,0 +1,12 @@
+[run]
+omit =
+    *__init__.py,
+    tests/*,
+    churn_library/exceptions.py,
+    churn_script_logging_and_tests.py,
+    churn_library/parameter.py,
+    churn_library/utils.py,
+    churn_library/logger.py,
+    churn_library/plots.py,
+    setup.py,
+    main.py,

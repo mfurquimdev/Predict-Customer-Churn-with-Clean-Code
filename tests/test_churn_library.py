@@ -1,7 +1,9 @@
+"""Test churn library"""
 import io
 import os
 import shutil
 from pathlib import Path
+from unittest.mock import call
 from unittest.mock import patch
 
 import joblib
@@ -10,10 +12,10 @@ import pytest
 
 from churn_library import encoder_helper
 from churn_library import import_data
-from churn_library import logger
 from churn_library import parameter
 from churn_library import perform_eda
 from churn_library import perform_feature_engineering
+from churn_library.churn_library import classification_report_image
 
 
 class TestImportData:
@@ -158,8 +160,58 @@ class TestPerformFeatureEngineering:
 class TestClassificationReportImage:
     """Test the production of classification report image for training and test results"""
 
-    def test_classification_report_image(self):
+    @patch("churn_library.churn_library.plot_report")
+    def test_classification_report_image(self, plot_report_mock):
         """Test calling the two plot report functions."""
+        test_data_path = Path("tests", "data")
+
+        y_train_preds_rf_path = test_data_path.joinpath("y_train_preds_rf.pkl")
+        y_test_preds_rf_path = test_data_path.joinpath("y_test_preds_rf.pkl")
+        y_train_preds_lr_path = test_data_path.joinpath("y_train_preds_lr.pkl")
+        y_test_preds_lr_path = test_data_path.joinpath("y_test_preds_lr.pkl")
+        y_train_path = test_data_path.joinpath("y_train.pkl")
+        y_test_path = test_data_path.joinpath("y_test.pkl")
+
+        y_train_preds_rf = joblib.load(y_train_preds_rf_path)
+        y_test_preds_rf = joblib.load(y_test_preds_rf_path)
+        y_train_preds_lr = joblib.load(y_train_preds_lr_path)
+        y_test_preds_lr = joblib.load(y_test_preds_lr_path)
+        y_train = joblib.load(y_train_path)
+        y_test = joblib.load(y_test_path)
+
+        image_folder = "fake_folder"
+
+        classification_report_image(
+            image_folder,
+            y_train,
+            y_test,
+            y_train_preds_lr,
+            y_train_preds_rf,
+            y_test_preds_lr,
+            y_test_preds_rf,
+        )
+
+        calls = [
+            call(
+                "fake_folder",
+                "Random Forest",
+                y_train,
+                y_test,
+                y_test_preds_rf,
+                y_train_preds_rf,
+            ),
+            call(
+                "fake_folder",
+                "Logistic Regression",
+                y_train,
+                y_test,
+                y_test_preds_lr,
+                y_train_preds_lr,
+            ),
+        ]
+
+        plot_report_mock.assert_has_calls(calls)
+
         pass
 
 

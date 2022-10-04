@@ -199,39 +199,18 @@ def classification_report_image(
     plot_report(image_folder, name, y_train, y_test, y_test_preds_lr, y_train_preds_lr)
 
 
-@display_info
-def train_models(
-    X_train,
-    X_test,
-    y_train,
-    y_test,
-):
-    """
-    Train, store model results: images + scores, and store models
-
-    Input:
-              X_train: X training data
-              X_test: X testing data
-              y_train: y training data
-              y_test: y testing data
-    Output:
-              None
-    """
-    logger.info("train models")
-
-    # grid search
-    random_state = parameter.get_env("RANDOM_STATE")
-    path_to_models = parameter.get_env("PATH_TO_MODELS")
-    path_to_dir = Path(path_to_models)
-    path_to_dir.mkdir(parents=True, exist_ok=True)
+def load_or_train_model(X_train, y_train):
+    """Load Random Forest, Logistic Regression and GridSearch models or train them"""
+    path_to_models = Path(parameter.get_env("PATH_TO_MODELS"))
+    path_to_models.mkdir(parents=True, exist_ok=True)
 
     rfc_file = "rfc.pkl"
     lrc_file = "lrc.pkl"
     cv_rfc_file = "cv_rfc.pkl"
 
-    rfc_path = path_to_dir.joinpath(rfc_file)
-    lrc_path = path_to_dir.joinpath(lrc_file)
-    cv_rfc_path = path_to_dir.joinpath(cv_rfc_file)
+    rfc_path = path_to_models.joinpath(rfc_file)
+    lrc_path = path_to_models.joinpath(lrc_file)
+    cv_rfc_path = path_to_models.joinpath(cv_rfc_file)
 
     if rfc_path.is_file() and lrc_path.is_file() and cv_rfc_path.is_file():
         logger.info(f"Models found under {path_to_models}")
@@ -242,6 +221,7 @@ def train_models(
 
     else:
         logger.debug("Creating Random Forest Classifier")
+        random_state = parameter.get_env("RANDOM_STATE")
         rfc = RandomForestClassifier(random_state=random_state)
 
         logger.debug("Creating Logistic Regression")
@@ -268,17 +248,44 @@ def train_models(
         joblib.dump(lrc, lrc_path)
         joblib.dump(cv_rfc, cv_rfc_path)
 
-    logger.debug("Running Random Forest Classifier prediction on train data")
-    y_train_preds_rf = cv_rfc.best_estimator_.predict(X_train)
+    return rfc, lrc, cv_rfc
 
-    logger.debug("Running Random Forest Classifier prediction on test data")
-    y_test_preds_rf = cv_rfc.best_estimator_.predict(X_test)
 
-    logger.debug("Running Logistic Regression prediction on train data")
-    y_train_preds_lr = lrc.predict(X_train)
+def train_and_test_prediction(model, X_train, X_test):
 
-    logger.debug("Running Logistic Regression prediction on test data")
-    y_test_preds_lr = lrc.predict(X_test)
+    y_train_preds = model.predict(X_train)
+    y_test_preds = model.predict(X_test)
+
+    return y_train_preds, y_test_preds
+
+
+@display_info
+def train_models(
+    X_train,
+    X_test,
+    y_train,
+    y_test,
+):
+    """
+    Train, store model results: images + scores, and store models
+
+    Input:
+              X_train: X training data
+              X_test: X testing data
+              y_train: y training data
+              y_test: y testing data
+    Output:
+              None
+    """
+    logger.info("train models")
+
+    rfc, lrc, cv_rfc = load_or_train_model(X_train, y_train)
+
+    logger.debug("Running Random Forest Classifier prediction on train and test data")
+    y_train_preds_rf, y_test_preds_rf = train_and_test_prediction(cv_rfc.best_estimator_, X_train, X_test)
+
+    logger.debug("Running Logistic Regression prediction on train and test data")
+    y_train_preds_lr, y_test_preds_lr = train_and_test_prediction(lrc, X_train, X_test)
 
     image_folder = parameter.get_env("PATH_TO_RESULT_IMAGE_FOLDER")
     Path(image_folder).mkdir(parents=True, exist_ok=True)

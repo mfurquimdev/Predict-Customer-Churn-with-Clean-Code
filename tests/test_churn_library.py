@@ -15,6 +15,7 @@ from churn_library import import_data
 from churn_library import parameter
 from churn_library import perform_eda
 from churn_library import perform_feature_engineering
+from churn_library import train_models
 from churn_library.churn_library import classification_report_image
 
 
@@ -165,19 +166,12 @@ class TestClassificationReportImage:
         """Test calling the two plot report functions."""
         test_data_path = Path("tests", "data")
 
-        y_train_preds_rf_path = test_data_path.joinpath("y_train_preds_rf.pkl")
-        y_test_preds_rf_path = test_data_path.joinpath("y_test_preds_rf.pkl")
-        y_train_preds_lr_path = test_data_path.joinpath("y_train_preds_lr.pkl")
-        y_test_preds_lr_path = test_data_path.joinpath("y_test_preds_lr.pkl")
-        y_train_path = test_data_path.joinpath("y_train.pkl")
-        y_test_path = test_data_path.joinpath("y_test.pkl")
-
-        y_train_preds_rf = joblib.load(y_train_preds_rf_path)
-        y_test_preds_rf = joblib.load(y_test_preds_rf_path)
-        y_train_preds_lr = joblib.load(y_train_preds_lr_path)
-        y_test_preds_lr = joblib.load(y_test_preds_lr_path)
-        y_train = joblib.load(y_train_path)
-        y_test = joblib.load(y_test_path)
+        y_train_preds_rf = joblib.load(test_data_path.joinpath("y_train_preds_rf.pkl"))
+        y_test_preds_rf = joblib.load(test_data_path.joinpath("y_test_preds_rf.pkl"))
+        y_train_preds_lr = joblib.load(test_data_path.joinpath("y_train_preds_lr.pkl"))
+        y_test_preds_lr = joblib.load(test_data_path.joinpath("y_test_preds_lr.pkl"))
+        y_train = joblib.load(test_data_path.joinpath("y_train.pkl"))
+        y_test = joblib.load(test_data_path.joinpath("y_test.pkl"))
 
         image_folder = "fake_folder"
 
@@ -215,9 +209,92 @@ class TestClassificationReportImage:
         pass
 
 
+class LoadOrTrainModel:
+    """Test Load or Train models."""
+
+    def loading_models(self):
+        pass
+
+    def training_models(self):
+        pass
+
+
 class TestTrainModels:
     """Test Train models."""
 
-    def test_already_exists_trained_models(self):
+    @patch.dict(os.environ, {"PATH_TO_RESULT_IMAGE_FOLDER": "fake_image_folder"})
+    @patch("churn_library.churn_library.load_or_train_model")
+    @patch("churn_library.churn_library.train_and_test_prediction")
+    @patch("churn_library.churn_library.classification_report_image")
+    @patch("churn_library.churn_library.plot_lrc_rfc_roc_curve")
+    @patch("churn_library.churn_library.plot_feature_importance")
+    def test_train_models(
+        self,
+        plot_feature_importance_mock,
+        plot_lrc_rfc_roc_curve_mock,
+        classification_report_image_mock,
+        train_and_test_prediction_mock,
+        load_or_train_model_mock,
+    ):
         """Test when there is a pickle file of a trained model."""
-        pass
+        test_data_path = Path("tests", "data")
+        image_folder = "fake_image_folder"
+
+        X_train = joblib.load(test_data_path.joinpath("X_train.pkl"))
+        X_test = joblib.load(test_data_path.joinpath("X_test.pkl"))
+        y_train = joblib.load(test_data_path.joinpath("y_train.pkl"))
+        y_test = joblib.load(test_data_path.joinpath("y_test.pkl"))
+
+        rfc = joblib.load(test_data_path.joinpath("rfc.pkl"))
+        lrc = joblib.load(test_data_path.joinpath("lrc.pkl"))
+        cv_rfc = joblib.load(test_data_path.joinpath("cv_rfc.pkl"))
+
+        y_train_preds_rf = joblib.load(test_data_path.joinpath("y_train_preds_rf.pkl"))
+        y_test_preds_rf = joblib.load(test_data_path.joinpath("y_test_preds_rf.pkl"))
+        y_train_preds_lr = joblib.load(test_data_path.joinpath("y_train_preds_lr.pkl"))
+        y_test_preds_lr = joblib.load(test_data_path.joinpath("y_test_preds_lr.pkl"))
+
+        load_or_train_model_mock.return_value = (rfc, lrc, cv_rfc)
+        load_or_train_model_call = (X_train, y_train)
+
+        train_and_test_prediction_mock.side_effect = [
+            (y_train_preds_rf, y_test_preds_rf),
+            (y_train_preds_lr, y_test_preds_lr),
+        ]
+
+        train_and_test_prediction_calls = [
+            call(cv_rfc.best_estimator_, X_train, X_test),
+            call(lrc, X_train, X_test),
+        ]
+
+        classification_report_image_call = (
+            image_folder,
+            y_train,
+            y_test,
+            y_train_preds_lr,
+            y_train_preds_rf,
+            y_test_preds_lr,
+            y_test_preds_rf,
+        )
+
+        plot_lrc_rfc_roc_curve_call = (
+            image_folder,
+            lrc,
+            cv_rfc.best_estimator_,
+            X_test,
+            y_test,
+        )
+
+        plot_feature_importance_call = (
+            cv_rfc,
+            X_test,
+            image_folder,
+        )
+
+        train_models(X_train, X_test, y_train, y_test)
+
+        load_or_train_model_mock.assert_called_once_with(*load_or_train_model_call)
+        train_and_test_prediction_mock.assert_has_calls(train_and_test_prediction_calls)
+        classification_report_image_mock.assert_called_once_with(*classification_report_image_call)
+        plot_lrc_rfc_roc_curve_mock.assert_called_once_with(*plot_lrc_rfc_roc_curve_call)
+        plot_feature_importance_mock.assert_called_once_with(*plot_feature_importance_call)

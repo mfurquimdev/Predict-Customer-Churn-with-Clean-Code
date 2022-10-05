@@ -231,7 +231,12 @@ class TestLoadOrTrainModel:
 
     @patch.dict(os.environ, {"PATH_TO_MODELS": "fake_path_to_models"})
     @patch("churn_library.churn_library.joblib.load")
-    def test_loading_models(self, joblib_load_mock, X_train, y_train):
+    def test_loading_models(
+        self,
+        joblib_load_mock,
+        X_train,
+        y_train,
+    ):
         """Test loading models when pickle files exist."""
         test_data_path = Path(parameter.get_env("PATH_TO_MODELS"))
         test_data_path.mkdir(parents=True, exist_ok=True)
@@ -266,9 +271,68 @@ class TestLoadOrTrainModel:
         assert test_data_path.exists()
         shutil.rmtree(test_data_path, ignore_errors=True)
 
-    def test_training_models(self):
+    @patch.dict(os.environ, {"PATH_TO_MODELS": "fake_path_to_models", "RANDOM_STATE": "42"})
+    @patch("churn_library.churn_library.RandomForestClassifier")
+    @patch("churn_library.churn_library.LogisticRegression")
+    @patch("churn_library.churn_library.GridSearchCV")
+    @patch("churn_library.churn_library.joblib.dump")
+    def test_training_models(
+        self,
+        joblib_dump_mock,
+        grid_search_cv_mock,
+        logistic_regression_mock,
+        random_forest_classifier_mock,
+        X_train,
+        y_train,
+    ):
         """Test training models when pickle files does not exist."""
-        pass
+        random_state = parameter.get_env("RANDOM_STATE")
+        test_data_path = Path(parameter.get_env("PATH_TO_MODELS"))
+        test_data_path.mkdir(parents=True, exist_ok=True)
+
+        rfc_path = Path(test_data_path, "rfc.pkl")
+        lrc_path = Path(test_data_path, "lrc.pkl")
+        cv_rfc_path = Path(test_data_path, "cv_rfc.pkl")
+
+        rfc_path.unlink(missing_ok=True)
+        lrc_path.unlink(missing_ok=True)
+        cv_rfc_path.unlink(missing_ok=True)
+
+        rfc_mock = MagicMock()
+        lrc_mock = MagicMock()
+        cv_rfc_mock = MagicMock()
+
+        random_forest_classifier_mock.return_value = rfc_mock
+        random_forest_classifier_call = {"random_state": random_state}
+
+        logistic_regression_mock.return_value = lrc_mock
+        logistic_regression_call = {"solver": "lbfgs", "max_iter": 3000}
+
+        param_grid = {
+            "n_estimators": [200, 500],
+            "max_features": ["auto", "sqrt"],
+            "max_depth": [4, 5, 100],
+            "criterion": ["gini", "entropy"],
+        }
+        grid_search_cv_mock.return_value = cv_rfc_mock
+        grid_search_cv_call = {"estimator": rfc_mock, "param_grid": param_grid, "cv": 5}
+
+        joblib_dump_calls = [
+            call(rfc_mock, rfc_path),
+            call(lrc_mock, lrc_path),
+            call(cv_rfc_mock, cv_rfc_path),
+        ]
+
+        rfc_actual, lrc_actual, cv_rfc_actual = load_or_train_model(X_train, y_train)
+
+        random_forest_classifier_mock.assert_called_once_with(**random_forest_classifier_call)
+        logistic_regression_mock.assert_called_once_with(**logistic_regression_call)
+        grid_search_cv_mock.assert_called_once_with(**grid_search_cv_call)
+
+        cv_rfc_mock.fit.assert_called_once_with(X_train, y_train)
+        lrc_mock.fit.assert_called_once_with(X_train, y_train)
+
+        joblib_dump_mock.assert_has_calls(joblib_dump_calls)
 
 
 class TestTrainAndTestPrediction:

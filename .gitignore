@@ -147,3 +147,4 @@ cython_debug/
 
 data/
 models/
+!tests/data

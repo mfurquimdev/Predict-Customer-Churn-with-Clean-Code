@@ -18,6 +18,7 @@ from churn_library import perform_eda
 from churn_library import perform_feature_engineering
 from churn_library import train_models
 from churn_library.churn_library import classification_report_image
+from churn_library.churn_library import train_and_test_prediction
 
 
 class TestImportData:
@@ -210,14 +211,39 @@ class TestClassificationReportImage:
         pass
 
 
-class LoadOrTrainModel:
+class TestLoadOrTrainModel:
     """Test Load or Train models."""
 
-    def loading_models(self):
+    def test_loading_models(self):
         pass
 
-    def training_models(self):
+    def test_training_models(self):
         pass
+
+
+class TestTrainAndTestPrediction:
+    """Test Train and Test prediction function"""
+
+    def test_train_and_test_prediction_with_fake_data(self):
+        """Test models' train and test prediction function"""
+
+        model_mock = MagicMock()
+        model_mock.predict.side_effect = ["y_train_preds", "y_test_preds"]
+
+        model_calls = [
+            call.predict("X_train"),
+            call.predict("X_test"),
+        ]
+
+        y_train_preds_actual, y_test_preds_actual = train_and_test_prediction(model_mock, "X_train", "X_test")
+
+        model_mock.assert_has_calls(model_calls)
+
+        y_train_preds_expected = "y_train_preds"
+        y_test_preds_expected = "y_test_preds"
+
+        assert y_train_preds_actual == y_train_preds_expected
+        assert y_test_preds_actual == y_test_preds_expected
 
 
 class TestTrainModels:

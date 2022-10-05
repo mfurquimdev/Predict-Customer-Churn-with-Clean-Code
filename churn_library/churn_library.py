@@ -23,8 +23,6 @@ from .plots import plot_report
 from .plots import plot_total_trans_ct
 from .utils import display_info
 
-# from .plots import explainer_plot
-
 
 @display_info
 def import_data(
@@ -34,10 +32,10 @@ def import_data(
     Returns dataframe for the csv found at path
 
     Input:
-            csv_name: the name of the csv file
+        csv_name: the name of the csv file
 
     Output:
-            df: pandas dataframe
+        df: pandas dataframe
     """
     path_to_data_folder = parameter.get_env("PATH_TO_DATA_FOLDER")
     path_to_csv = os.path.join(path_to_data_folder, csv_name)
@@ -57,10 +55,10 @@ def perform_eda(
     Perform eda on df and save figures to images folder
 
     Input:
-            df: pandas dataframe
+        df: pandas dataframe
 
     Output:
-            None
+        None
     """
     image_folder = parameter.get_env("PATH_TO_IMAGE_FOLDER")
     Path(image_folder).mkdir(parents=True, exist_ok=True)
@@ -84,12 +82,12 @@ def encoder_helper(
     propotion of churn for each category - associated with cell 15 from the notebook
 
     Input:
-            df: pandas dataframe
-            category_list: list of columns that contain categorical features
-            response: string of response name [optional argument that could be used for naming variables or index y column]
+        df: pandas dataframe
+        category_list: list of columns that contain categorical features
+        response: string of response name [optional argument that could be used for naming variables or index y column]
 
     Output:
-            df: pandas dataframe with new columns for
+        df: pandas dataframe with new columns for
     """
     logger.info(f"encoding columns {category_list}")
 
@@ -125,14 +123,14 @@ def perform_feature_engineering(
     Helper function to perform feature engineer on DataFrame df.
 
     Input:
-              df: pandas dataframe
-              response: string of response name [optional argument that could be used for naming variables or index y column]
+        df: pandas dataframe
+        response: string of response name [optional argument that could be used for naming variables or index y column]
 
     Output:
-              X_train: X training data
-              X_test: X testing data
-              y_train: y training data
-              y_test: y testing data
+        X_train: X training data
+        X_test: X testing data
+        y_train: y training data
+        y_test: y testing data
     """
     logger.info("perform feature engineering")
 
@@ -178,17 +176,16 @@ def classification_report_image(
     in images folder
 
     Input:
-
-            image_folder: directory to save plot
-            y_train: training response values
-            y_test:  test response values
-            y_train_preds_lr: training predictions from logistic regression
-            y_train_preds_rf: training predictions from random forest
-            y_test_preds_lr: test predictions from logistic regression
-            y_test_preds_rf: test predictions from random forest
+        image_folder: directory to save plot
+        y_train: training response values
+        y_test:  test response values
+        y_train_preds_lr: training predictions from logistic regression
+        y_train_preds_rf: training predictions from random forest
+        y_test_preds_lr: test predictions from logistic regression
+        y_test_preds_rf: test predictions from random forest
 
     Output:
-             None
+        None
     """
     logger.info("classification report image")
 
@@ -200,7 +197,17 @@ def classification_report_image(
 
 
 def load_or_train_model(X_train, y_train):
-    """Load Random Forest, Logistic Regression and GridSearch models or train them"""
+    """Load Random Forest, Logistic Regression and GridSearch models or train them
+
+    Input:
+        X_train: X training data
+        y_train: y training data
+
+    Output:
+        rfc: Random Forest Classifier model
+        lrc: Logistic Regression Classifier model
+        cv_rfc: GridSerach CV of Random Forest Classifier model
+    """
     path_to_models = Path(parameter.get_env("PATH_TO_MODELS"))
     path_to_models.mkdir(parents=True, exist_ok=True)
 
@@ -252,6 +259,17 @@ def load_or_train_model(X_train, y_train):
 
 
 def train_and_test_prediction(model, X_train, X_test):
+    """Return model's train and test prediction
+
+    Input:
+        model: Trained model
+        X_train: X training data
+        X_test: X testing data
+
+    Output:
+        y_train_preds: Train prediction
+        y_test_preds: Test prediction
+    """
 
     y_train_preds = model.predict(X_train)
     y_test_preds = model.predict(X_test)
@@ -270,16 +288,17 @@ def train_models(
     Train, store model results: images + scores, and store models
 
     Input:
-              X_train: X training data
-              X_test: X testing data
-              y_train: y training data
-              y_test: y testing data
+        X_train: X training data
+        X_test: X testing data
+        y_train: y training data
+        y_test: y testing data
+
     Output:
-              None
+        None
     """
     logger.info("train models")
 
-    rfc, lrc, cv_rfc = load_or_train_model(X_train, y_train)
+    _, lrc, cv_rfc = load_or_train_model(X_train, y_train)
 
     logger.debug("Running Random Forest Classifier prediction on train and test data")
     y_train_preds_rf, y_test_preds_rf = train_and_test_prediction(cv_rfc.best_estimator_, X_train, X_test)

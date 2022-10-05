@@ -4,6 +4,7 @@ import os
 import shutil
 from pathlib import Path
 from unittest.mock import call
+from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import joblib
@@ -228,6 +229,86 @@ class TestTrainModels:
     @patch("churn_library.churn_library.classification_report_image")
     @patch("churn_library.churn_library.plot_lrc_rfc_roc_curve")
     @patch("churn_library.churn_library.plot_feature_importance")
+    def test_train_models_with_fake_data(
+        self,
+        plot_feature_importance_mock,
+        plot_lrc_rfc_roc_curve_mock,
+        classification_report_image_mock,
+        train_and_test_prediction_mock,
+        load_or_train_model_mock,
+    ):
+        """Test when there is a pickle file of a trained model."""
+        image_folder = "fake_image_folder"
+
+        X_train = "X_train"
+        X_test = "X_test"
+        y_train = "y_train"
+        y_test = "y_test"
+
+        rfc = "rfc"
+        lrc = "lrc"
+        cv_rfc = MagicMock()
+
+        y_train_preds_rf = "y_train_preds_rf"
+        y_test_preds_rf = "y_test_preds_rf"
+        y_train_preds_lr = "y_train_preds_lr"
+        y_test_preds_lr = "y_test_preds_lr"
+
+        load_or_train_model_mock.return_value = (rfc, lrc, cv_rfc)
+        load_or_train_model_call = (X_train, y_train)
+
+        train_and_test_prediction_mock.side_effect = [
+            (y_train_preds_rf, y_test_preds_rf),
+            (y_train_preds_lr, y_test_preds_lr),
+        ]
+
+        train_and_test_prediction_calls = [
+            call(cv_rfc.best_estimator_, X_train, X_test),
+            call(lrc, X_train, X_test),
+        ]
+
+        classification_report_image_call = (
+            image_folder,
+            y_train,
+            y_test,
+            y_train_preds_lr,
+            y_train_preds_rf,
+            y_test_preds_lr,
+            y_test_preds_rf,
+        )
+
+        plot_lrc_rfc_roc_curve_call = (
+            image_folder,
+            lrc,
+            cv_rfc.best_estimator_,
+            X_test,
+            y_test,
+        )
+
+        plot_feature_importance_call = (
+            cv_rfc,
+            X_test,
+            image_folder,
+        )
+
+        train_models(X_train, X_test, y_train, y_test)
+
+        load_or_train_model_mock.assert_called_once_with(*load_or_train_model_call)
+        train_and_test_prediction_mock.assert_has_calls(train_and_test_prediction_calls)
+        classification_report_image_mock.assert_called_once_with(*classification_report_image_call)
+        plot_lrc_rfc_roc_curve_mock.assert_called_once_with(*plot_lrc_rfc_roc_curve_call)
+        plot_feature_importance_mock.assert_called_once_with(*plot_feature_importance_call)
+
+        image_path = Path(image_folder)
+        assert image_path.exists()
+        shutil.rmtree(image_path, ignore_errors=True)
+
+    @patch.dict(os.environ, {"PATH_TO_RESULT_IMAGE_FOLDER": "fake_image_folder"})
+    @patch("churn_library.churn_library.load_or_train_model")
+    @patch("churn_library.churn_library.train_and_test_prediction")
+    @patch("churn_library.churn_library.classification_report_image")
+    @patch("churn_library.churn_library.plot_lrc_rfc_roc_curve")
+    @patch("churn_library.churn_library.plot_feature_importance")
     def test_train_models(
         self,
         plot_feature_importance_mock,
@@ -298,3 +379,7 @@ class TestTrainModels:
         classification_report_image_mock.assert_called_once_with(*classification_report_image_call)
         plot_lrc_rfc_roc_curve_mock.assert_called_once_with(*plot_lrc_rfc_roc_curve_call)
         plot_feature_importance_mock.assert_called_once_with(*plot_feature_importance_call)
+
+        image_path = Path(image_folder)
+        assert image_path.exists()
+        shutil.rmtree(image_path, ignore_errors=True)

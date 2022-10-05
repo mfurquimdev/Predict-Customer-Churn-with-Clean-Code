@@ -8,33 +8,30 @@ setup(
     author_email="mateus@mfurquim.dev",
     url="https://github.com/mfurquimdev/Predict-Customer-Churn-with-Clean-Code",
     packages=[
-        # "simulation_statistical",
-        # "simulation_statistical.reader",
-        # "simulation_statistical.writer",
-        # "statistical_disag",
-        # "statistical_disag.prior_knowledge",
-        # "statistical_disag.retro",
-        # "utils",
+        "churn_library",
     ],
     include_package_data=True,
     install_requires=[
-        "scikit-learn==0.24.1"
-        "shap==0.40.0"
-        "joblib==1.0.1"
-        "pandas==1.2.4"
-        "numpy==1.20.1"
-        "matplotlib==3.3.4"
-        "seaborn==0.11.2"
-        # "pylint==2.7.4"
-        # "autopep8==1.5.6"
+        "scikit-learn",
+        "shap",
+        "joblib",
+        "pandas",
+        "numpy",
+        "matplotlib",
+        "seaborn",
+        "loguru",
     ],
     extras_require={
         "dev": [
-            "ipykernel~=7.12.1",
-            "pytest~=7.1.1",
-            "coverage~=6.3.2",
-            "pytest-cov~=3.0.0",
-            "black~=22.3.0",
-        ]
+            "ipykernel",
+            "ipdb",
+            "pytest",
+            "coverage",
+            "pytest-cov",
+            "black",
+            "autopep8",
+            "pre-commit",
+            "pylint",
+        ],
     },
 )

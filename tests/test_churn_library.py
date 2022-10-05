@@ -18,6 +18,7 @@ from churn_library import perform_eda
 from churn_library import perform_feature_engineering
 from churn_library import train_models
 from churn_library.churn_library import classification_report_image
+from churn_library.churn_library import load_or_train_model
 from churn_library.churn_library import train_and_test_prediction
 
 
@@ -214,10 +215,59 @@ class TestClassificationReportImage:
 class TestLoadOrTrainModel:
     """Test Load or Train models."""
 
-    def test_loading_models(self):
-        pass
+    @pytest.fixture(scope="class")
+    @patch.dict(os.environ, {"PATH_TO_MODELS": "tests/data"})
+    def X_train(self):
+        """Load real csv into DataFrame."""
+        test_data_path = Path(parameter.get_env("PATH_TO_MODELS"))
+        yield joblib.load(test_data_path.joinpath("X_train.pkl"))
+
+    @pytest.fixture(scope="class")
+    @patch.dict(os.environ, {"PATH_TO_MODELS": "tests/data"})
+    def y_train(self):
+        """Load real csv into DataFrame."""
+        test_data_path = Path(parameter.get_env("PATH_TO_MODELS"))
+        yield joblib.load(test_data_path.joinpath("y_train.pkl"))
+
+    @patch.dict(os.environ, {"PATH_TO_MODELS": "fake_path_to_models"})
+    @patch("churn_library.churn_library.joblib.load")
+    def test_loading_models(self, joblib_load_mock, X_train, y_train):
+        """Test loading models when pickle files exist."""
+        test_data_path = Path(parameter.get_env("PATH_TO_MODELS"))
+        test_data_path.mkdir(parents=True, exist_ok=True)
+
+        rfc_path = Path(test_data_path, "rfc.pkl")
+        lrc_path = Path(test_data_path, "lrc.pkl")
+        cv_rfc_path = Path(test_data_path, "cv_rfc.pkl")
+
+        rfc_path.touch()
+        lrc_path.touch()
+        cv_rfc_path.touch()
+
+        joblib_load_mock.side_effect = ["rfc", "lrc", "cv_rfc"]
+        joblib_load_calls = [
+            call(rfc_path),
+            call(lrc_path),
+            call(cv_rfc_path),
+        ]
+
+        rfc_actual, lrc_actual, cv_rfc_actual = load_or_train_model(X_train, y_train)
+
+        rfc_expected = "rfc"
+        lrc_expected = "lrc"
+        cv_rfc_expected = "cv_rfc"
+
+        assert rfc_expected == rfc_actual
+        assert lrc_expected == lrc_actual
+        assert cv_rfc_expected == cv_rfc_actual
+
+        joblib_load_mock.assert_has_calls(joblib_load_calls)
+
+        assert test_data_path.exists()
+        shutil.rmtree(test_data_path, ignore_errors=True)
 
     def test_training_models(self):
+        """Test training models when pickle files does not exist."""
         pass
 
 
@@ -225,7 +275,7 @@ class TestTrainAndTestPrediction:
     """Test Train and Test prediction function"""
 
     def test_train_and_test_prediction_with_fake_data(self):
-        """Test models' train and test prediction function"""
+        """Test model's train and test prediction function"""
 
         model_mock = MagicMock()
         model_mock.predict.side_effect = ["y_train_preds", "y_test_preds"]

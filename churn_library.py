@@ -16,12 +16,12 @@ from sklearn.preprocessing import normalize
 
 from library import logger
 from library import parameter
-from library.plots import plot_churn_histogram
+from library.plots import plot_churn_distribution
 from library.plots import plot_correlation
+from library.plots import plot_distribution
 from library.plots import plot_feature_importance
-from library.plots import plot_histogram
 from library.plots import plot_lrc_rfc_roc_curve
-from library.plots import plot_marital_status_histogram
+from library.plots import plot_marital_status_distribution
 from library.plots import plot_report
 from library.plots import plot_total_trans_ct
 from library.utils import display_info
@@ -29,6 +29,7 @@ from library.utils import display_info
 
 def main():
     """Main function when the library is issued via command line"""
+    logger.info("Main function")
 
     sns.set()
     plt.style.use("ggplot")
@@ -71,6 +72,7 @@ def import_data(
     """
     path_to_data_folder = parameter.get_env("PATH_TO_DATA_FOLDER")
     path_to_csv = os.path.join(path_to_data_folder, csv_name)
+    logger.info(f"import data from {csv_name}")
     df = pd.read_csv(path_to_csv, index_col=0)
     logger.info(f"loaded data of shape {df.shape} from {csv_name}")
 
@@ -94,13 +96,15 @@ def perform_eda(
     """
     image_folder = parameter.get_env("PATH_TO_IMAGE_FOLDER")
     Path(image_folder).mkdir(parents=True, exist_ok=True)
+    logger.info(f"Perform EDA and save plots on {image_folder}")
 
-    plot_churn_histogram(df, image_folder)
-    plot_histogram(df, "Customer_Age", image_folder)
-    plot_marital_status_histogram(df, image_folder)
+    plot_churn_distribution(df, image_folder)
+    plot_distribution(df, "Customer_Age", image_folder)
+    plot_marital_status_distribution(df, image_folder)
     plot_total_trans_ct(df, image_folder)
     plot_correlation(df, image_folder)
-    logger.info(f"saved images on {image_folder}")
+
+    logger.info(f"Saved EDA images on {image_folder}")
 
 
 @display_info

@@ -40,7 +40,7 @@ class TestImportData:
     def test_real_data(self):
         """Test loading real csv."""
 
-        csv_name = "BankChurners.csv"
+        csv_name = "bank_data.csv"
 
         df = import_data(csv_name)
 
@@ -54,7 +54,7 @@ class TestPerformEDA:
     def df(self):
         """Load real csv into DataFrame."""
 
-        csv_name = "BankChurners.csv"
+        csv_name = "bank_data.csv"
         df = import_data(csv_name)
         yield df
         del df
@@ -73,18 +73,18 @@ class TestPerformEDA:
         yield image_folder
 
     @patch.dict(os.environ, {"PATH_TO_IMAGE_FOLDER": "tests/images"})
-    @patch("churn_library.plot_churn_histogram")
-    @patch("churn_library.plot_histogram")
-    @patch("churn_library.plot_marital_status_histogram")
+    @patch("churn_library.plot_churn_distribution")
+    @patch("churn_library.plot_distribution")
+    @patch("churn_library.plot_marital_status_distribution")
     @patch("churn_library.plot_total_trans_ct")
     @patch("churn_library.plot_correlation")
     def test_perform_eda(
         self,
         plot_correlation_mock,
         plot_total_trans_ct_mock,
-        plot_marital_status_histogram_mock,
-        plot_histogram_mock,
-        plot_churn_histogram_mock,
+        plot_marital_status_distribution_mock,
+        plot_distribution_mock,
+        plot_churn_distribution_mock,
         df,
         image_folder,
     ):
@@ -94,9 +94,9 @@ class TestPerformEDA:
 
         assert Path(image_folder).exists()
 
-        plot_churn_histogram_mock.assert_called_once_with(df, image_folder)
-        plot_histogram_mock.assert_called_once_with(df, "Customer_Age", image_folder)
-        plot_marital_status_histogram_mock.assert_called_once_with(df, image_folder)
+        plot_churn_distribution_mock.assert_called_once_with(df, image_folder)
+        plot_distribution_mock.assert_called_once_with(df, "Customer_Age", image_folder)
+        plot_marital_status_distribution_mock.assert_called_once_with(df, image_folder)
         plot_total_trans_ct_mock.assert_called_once_with(df, image_folder)
         plot_correlation_mock.assert_called_once_with(df, image_folder)
 
@@ -229,7 +229,7 @@ class TestLoadOrTrainModel:
         test_data_path = Path(parameter.get_env("PATH_TO_MODELS"))
         yield joblib.load(test_data_path.joinpath("y_train.pkl"))
 
-    @patch.dict(os.environ, {"PATH_TO_MODELS": "fake_path_to_models"})
+    @patch.dict(os.environ, {"PATH_TO_MODELS": "tests/images"})
     @patch("churn_library.joblib.load")
     def test_loading_models(
         self,
@@ -271,7 +271,7 @@ class TestLoadOrTrainModel:
         assert test_data_path.exists()
         shutil.rmtree(test_data_path, ignore_errors=True)
 
-    @patch.dict(os.environ, {"PATH_TO_MODELS": "fake_path_to_models", "RANDOM_STATE": "42"})
+    @patch.dict(os.environ, {"PATH_TO_MODELS": "tests/images", "RANDOM_STATE": "42"})
     @patch("churn_library.RandomForestClassifier")
     @patch("churn_library.LogisticRegression")
     @patch("churn_library.GridSearchCV")

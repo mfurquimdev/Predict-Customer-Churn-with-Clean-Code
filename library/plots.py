@@ -207,7 +207,7 @@ def plot_report(
     Output:
              None
     """
-    logger.info(f"plot report for {name} model")
+    logger.info(f"Plot report for {name} model")
 
     train_classification_report = classification_report(y_train, y_train_preds)
     test_classification_report = classification_report(y_test, y_test_preds)
@@ -219,10 +219,11 @@ def plot_report(
     plt.text(0.01, 0.7, str(test_classification_report), {"fontsize": 10}, fontproperties="monospace")
     plt.axis("off")
 
-    image_name = f"{name}_report"
+    training_name = "_".join(name.lower().split())
+    image_name = f"{training_name}_results"
     path_to_image = os.path.join(image_folder, image_name)
 
-    logger.info(f"saving plot on {path_to_image}")
+    logger.info(f"Saving plot on {path_to_image}")
     plt.savefig(path_to_image, bbox_inches="tight")
 
 
@@ -246,17 +247,17 @@ def plot_lrc_rfc_roc_curve(
     Output:
              None
     """
-    logger.info("plot lrf and rfc ROC curve")
+    logger.info("Plot Logistic Regression and Random Forest Classifier ROC curve")
     _, ax = plt.subplots(figsize=(15, 8))
     # ax = plt.gca()
 
     _ = plot_roc_curve(lrc, X_test, y_test, ax=ax, alpha=0.8)
     _ = plot_roc_curve(rfc, X_test, y_test, ax=ax, alpha=0.8)
 
-    image_name = "roc_curve"
+    image_name = "roc_curve_result"
     path_to_image = os.path.join(image_folder, image_name)
 
-    logger.info(f"saving plot on {path_to_image}")
+    logger.info(f"Saving plot on {path_to_image}")
     plt.savefig(path_to_image, bbox_inches="tight")
 
 
@@ -301,7 +302,7 @@ def plot_feature_importance(
     Output:
              None
     """
-    logger.info("plot feature importance")
+    logger.info("Plot feature importance")
 
     # Calculate feature importances
     importances = model.best_estimator_.feature_importances_
@@ -328,5 +329,5 @@ def plot_feature_importance(
     image_name = "feature_importance"
     path_to_image = os.path.join(output_path, image_name)
 
-    logger.info(f"saving plot on {path_to_image}")
+    logger.info(f"Saving plot on {path_to_image}")
     plt.savefig(path_to_image, bbox_inches="tight")

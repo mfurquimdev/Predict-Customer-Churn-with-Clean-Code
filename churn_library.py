@@ -29,7 +29,7 @@ from library.utils import display_info
 
 def main():
     """Main function when the library is issued via command line"""
-    logger.info("Main function")
+    logger.info("Running script as main()")
 
     sns.set()
     plt.style.use("ggplot")
@@ -55,6 +55,8 @@ def main():
     X_train, X_test, y_train, y_test = perform_feature_engineering(df)
 
     train_models(X_train, X_test, y_train, y_test)
+
+    logger.info("Finished running main script")
 
 
 @display_info
@@ -125,10 +127,10 @@ def encoder_helper(
     Output:
         df: pandas dataframe with new columns for
     """
-    logger.info(f"encoding columns {category_list}")
+    logger.info(f"Encoding columns {category_list}")
 
     def encode_column(_df, col):
-        logger.debug(f"encoding column {col}")
+        logger.debug(f"Encoding column {col}")
         df = _df.copy(deep=True)
 
         groups = df.groupby(col).mean()["Churn"]
@@ -137,7 +139,7 @@ def encoder_helper(
         for val in df[col]:
             lst.append(groups.loc[val])
 
-        logger.debug(f"encoding column {col}: {lst}")
+        logger.debug(f"Encoding column {col}: {lst[:3]}")
         df[f"{col}_Churn"] = lst
 
         return df
@@ -145,7 +147,7 @@ def encoder_helper(
     for col in category_list:
         df = encode_column(df, col)
 
-    logger.info(f"encoded columns {category_list}")
+    logger.info(f"Encoded columns {category_list}")
 
     return df
 
@@ -168,7 +170,7 @@ def perform_feature_engineering(
         y_train: y training data
         y_test: y testing data
     """
-    logger.info("perform feature engineering")
+    logger.info("Perform feature engineering")
 
     # fmt: off
     keep_cols = [
@@ -223,7 +225,7 @@ def classification_report_image(
     Output:
         None
     """
-    logger.info("classification report image")
+    logger.info("Generating classification report image")
 
     name = "Random Forest"
     plot_report(image_folder, name, y_train, y_test, y_test_preds_rf, y_train_preds_rf)
@@ -256,13 +258,14 @@ def load_or_train_model(X_train, y_train):
     cv_rfc_path = path_to_models.joinpath(cv_rfc_file)
 
     if rfc_path.is_file() and lrc_path.is_file() and cv_rfc_path.is_file():
-        logger.info(f"Models found under {path_to_models}")
+        logger.info(f"Loading models found under {path_to_models}")
 
         rfc = joblib.load(rfc_path)
         lrc = joblib.load(lrc_path)
         cv_rfc = joblib.load(cv_rfc_path)
 
     else:
+
         logger.debug("Creating Random Forest Classifier")
         random_state = parameter.get_env("RANDOM_STATE")
         rfc = RandomForestClassifier(random_state=random_state)

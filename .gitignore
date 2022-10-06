@@ -143,9 +143,3 @@ cython_debug/
 
 .idea
 .DS_Store
-
-
-data/
-models/
-!tests/data
-images

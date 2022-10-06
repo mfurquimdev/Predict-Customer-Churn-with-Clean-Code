@@ -12,7 +12,7 @@ def display_info(func):
     @functools.wraps(func)
     def inner(*args, **kwargs):
         log_level = os.getenv("LOG_LEVEL", "DEBUG").upper()
-        if log_level == "DEBUG":
+        if log_level == "TRACE":
             inner_frame = inspect.currentframe()
             called_frame = inspect.getouterframes(inner_frame)[1].frame
 
@@ -42,7 +42,7 @@ def display_info(func):
 
         value = func(*args, **kwargs)
 
-        if log_level == "DEBUG":
+        if log_level == "TRACE":
             end_time = time.monotonic()
             elapsed_time = round((end_time - start_time) * 1000, 6)
             logger.debug(f"{info_path} Finished {func.__name__} in {elapsed_time} miliseconds -> {value}")

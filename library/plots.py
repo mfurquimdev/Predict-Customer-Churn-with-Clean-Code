@@ -26,7 +26,7 @@ def plot_correlation(
     Output:
              None
     """
-    logger.info("plot correlation")
+    logger.info("Plot correlation with heatmap")
 
     df = df.rename(
         columns={
@@ -53,10 +53,10 @@ def plot_correlation(
 
     plt.autoscale()
 
-    image_name = "correlation"
+    image_name = "heatmap"
     path_to_image = os.path.join(image_folder, image_name)
 
-    logger.info(f"saving plot on {path_to_image}")
+    logger.info(f"Saving plot on {path_to_image}")
     plt.savefig(path_to_image, bbox_inches="tight")
 
 
@@ -65,7 +65,7 @@ def plot_total_trans_ct(
     image_folder: str,
 ) -> None:
     """
-    Produces total trans ct histogram
+    Produces total transaction distribution
 
     Input:
             df: the entire data set
@@ -74,25 +74,25 @@ def plot_total_trans_ct(
     Output:
              None
     """
-    logger.info("plot total trans ct")
+    logger.info("Plot total transaction")
 
     plt.figure(figsize=(10, 5))
 
     sns.histplot(df["Total_Trans_Ct"], stat="density", kde=True)
 
-    image_name = "total_trans_ct_histogram"
+    image_name = "total_transaction_distribution"
     path_to_image = os.path.join(image_folder, image_name)
 
-    logger.info(f"saving plot on {path_to_image}")
+    logger.info(f"Saving plot on {path_to_image}")
     plt.savefig(path_to_image)
 
 
-def plot_marital_status_histogram(
+def plot_marital_status_distribution(
     df: pd.DataFrame,
     image_folder: str,
 ) -> None:
     """
-    Produces marital status histogram
+    Produces marital status distribution
 
     Input:
             df: the entire data set
@@ -101,43 +101,43 @@ def plot_marital_status_histogram(
     Output:
              None
     """
-    logger.info("plot marital status histogram")
+    logger.info("Plot marital status distribution")
 
     plt.figure(figsize=(10, 5))
     marital_status = df.Marital_Status.value_counts("normalize")
     marital_status.sort_values(ascending=False).plot.bar(
         figsize=(10, 5),
-        title="Histogram Normalised of Marital Status",
+        title="distribution Normalised of Marital Status",
         ylabel="Normalised Frequency",
         rot=0,
     )
-    image_name = "marital_status_histogram"
+    image_name = "marital_status_distribution"
     path_to_image = os.path.join(image_folder, image_name)
 
-    logger.info(f"saving plot on {path_to_image}")
+    logger.info(f"Saving plot on {path_to_image}")
     plt.savefig(path_to_image)
 
 
-def plot_histogram(
+def plot_distribution(
     df: pd.DataFrame,
     feature: str,
     image_folder: str,
 ) -> None:
     """
-    Produces histogram for a given feature
+    Produces distribution for a given feature
 
     Input:
             df: the entire data set
-            feature: the given feature to generate the histogram
+            feature: the given feature to generate the distribution
             image_folder: directory to save plot
 
     Output:
              None
     """
-    logger.info(f"plot histogram for {feature}")
+    logger.info(f"Plot distribution for {feature}")
 
     plt.figure(figsize=(10, 5))
-    plt.title(f"Histogram of {feature}")
+    plt.title(f"distribution of {feature}")
 
     plt.locator_params(axis="y", integer=True)
     plt.ylabel("Frequency", fontweight="bold", labelpad=20)
@@ -145,19 +145,19 @@ def plot_histogram(
     labels, counts = np.unique(df[feature], return_counts=True)
     plt.bar(labels, counts)
 
-    image_name = f"{feature}_histogram"
+    image_name = f"{feature.lower()}_distribution"
     path_to_image = os.path.join(image_folder, image_name)
 
-    logger.info(f"saving plot on {path_to_image}")
+    logger.info(f"Saving plot on {path_to_image}")
     plt.savefig(path_to_image)
 
 
-def plot_churn_histogram(
+def plot_churn_distribution(
     df: pd.DataFrame,
     image_folder: str,
 ) -> None:
     """
-    Produces histogram for churn feature
+    Produces distribution for churn feature
 
     Input:
             df: the entire data set
@@ -166,9 +166,10 @@ def plot_churn_histogram(
     Output:
              None
     """
-    logger.info("plot churn histogram")
+    logger.info("Plot churn distribution")
+
     plt.figure(figsize=(10, 5))
-    plt.title("Histogram of Churn")
+    plt.title("distribution of Churn")
 
     plt.locator_params(axis="y", integer=True)
     plt.ylabel("Number of people", fontweight="bold", labelpad=20)
@@ -177,10 +178,10 @@ def plot_churn_histogram(
     labels = ["No Churn", "Churn"]
     plt.bar(labels, counts)
 
-    image_name = "churn_histogram"
+    image_name = "churn_distribution"
     path_to_image = os.path.join(image_folder, image_name)
 
-    logger.info(f"saving plot on {path_to_image}")
+    logger.info(f"Saving plot on {path_to_image}")
     plt.savefig(path_to_image)
 
 

@@ -1,0 +1,50 @@
+2022-10-06T14:54:46.936735-0300 - INFO: Running script as main()
+2022-10-06T14:54:46.937448-0300 - INFO: import data from bank_data.csv
+2022-10-06T14:54:46.955944-0300 - INFO: loaded data of shape (10127, 22) from bank_data.csv
+2022-10-06T14:54:46.959122-0300 - INFO: Perform EDA and save plots on images/eda
+2022-10-06T14:54:46.959188-0300 - INFO: Plot churn distribution
+2022-10-06T14:54:47.091619-0300 - INFO: Saving plot on images/eda/churn_distribution
+2022-10-06T14:54:47.226570-0300 - INFO: Plot distribution for Customer_Age
+2022-10-06T14:54:47.299718-0300 - INFO: Saving plot on images/eda/customer_age_distribution
+2022-10-06T14:54:47.366674-0300 - INFO: Plot marital status distribution
+2022-10-06T14:54:47.432926-0300 - INFO: Saving plot on images/eda/marital_status_distribution
+2022-10-06T14:54:47.482088-0300 - INFO: Plot total transaction
+2022-10-06T14:54:47.684696-0300 - INFO: Saving plot on images/eda/total_transaction_distribution
+2022-10-06T14:54:47.745451-0300 - INFO: Plot correlation with heatmap
+2022-10-06T14:54:47.944604-0300 - INFO: Saving plot on images/eda/heatmap
+2022-10-06T14:54:48.183310-0300 - INFO: Saved EDA images on images/eda
+2022-10-06T14:54:48.183420-0300 - INFO: Encoding columns ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category', 'Card_Category']
+2022-10-06T14:54:48.183469-0300 - DEBUG: Encoding column Gender
+2022-10-06T14:54:48.275141-0300 - DEBUG: Encoding column Gender: [0.14615223317257287, 0.17357222844344905, 0.14615223317257287]
+2022-10-06T14:54:48.276779-0300 - DEBUG: Encoding column Education_Level
+2022-10-06T14:54:48.367043-0300 - DEBUG: Encoding column Education_Level: [0.15201192250372578, 0.15569053708439898, 0.15569053708439898]
+2022-10-06T14:54:48.368745-0300 - DEBUG: Encoding column Marital_Status
+2022-10-06T14:54:48.459623-0300 - DEBUG: Encoding column Marital_Status: [0.15126946874333264, 0.16941415166117169, 0.15126946874333264]
+2022-10-06T14:54:48.461299-0300 - DEBUG: Encoding column Income_Category
+2022-10-06T14:54:48.553419-0300 - DEBUG: Encoding column Income_Category: [0.13480741797432239, 0.17186183656276327, 0.15765472312703582]
+2022-10-06T14:54:48.555062-0300 - DEBUG: Encoding column Card_Category
+2022-10-06T14:54:48.645458-0300 - DEBUG: Encoding column Card_Category: [0.1609792284866469, 0.1609792284866469, 0.1609792284866469]
+2022-10-06T14:54:48.647112-0300 - INFO: Encoded columns ['Gender', 'Education_Level', 'Marital_Status', 'Income_Category', 'Card_Category']
+2022-10-06T14:54:48.647183-0300 - INFO: Perform feature engineering
+2022-10-06T14:54:48.655692-0300 - DEBUG: test_size = 0.3
+2022-10-06T14:54:48.658066-0300 - INFO: Data set split into 70.0% train (7088) and 30.0% test (3039) with random state = 42
+2022-10-06T14:54:48.658162-0300 - INFO: train models
+2022-10-06T14:54:48.658329-0300 - DEBUG: Creating Random Forest Classifier
+2022-10-06T14:54:48.658405-0300 - DEBUG: Creating Logistic Regression
+2022-10-06T14:54:48.658456-0300 - DEBUG: Creating Grid Search CV with Random Forest Classifier as the estimator
+2022-10-06T14:54:48.658508-0300 - DEBUG: Running Grid Search CV
+2022-10-06T14:58:09.464246-0300 - DEBUG: Running Logistic Regression
+2022-10-06T14:58:09.647537-0300 - INFO: Saving models under models
+2022-10-06T14:58:09.814104-0300 - DEBUG: Running Random Forest Classifier prediction on train and test data
+2022-10-06T14:58:09.983626-0300 - DEBUG: Running Logistic Regression prediction on train and test data
+2022-10-06T14:58:09.986036-0300 - INFO: Using images/results directory to save result images
+2022-10-06T14:58:09.986217-0300 - INFO: Generating classification report image
+2022-10-06T14:58:09.986332-0300 - INFO: Plot report for Random Forest model
+2022-10-06T14:58:10.017192-0300 - INFO: Saving plot on images/results/random_forest_results
+2022-10-06T14:58:10.287341-0300 - INFO: Plot report for Logistic Regression model
+2022-10-06T14:58:10.299764-0300 - INFO: Saving plot on images/results/logistic_regression_results
+2022-10-06T14:58:10.498426-0300 - INFO: Plot Logistic Regression and Random Forest Classifier ROC curve
+2022-10-06T14:58:10.679052-0300 - INFO: Saving plot on images/results/roc_curve_result
+2022-10-06T14:58:10.834590-0300 - INFO: Plot feature importance
+2022-10-06T14:58:10.923297-0300 - INFO: Saving plot on images/results/feature_importance
+2022-10-06T14:58:11.175524-0300 - INFO: Finished running main script

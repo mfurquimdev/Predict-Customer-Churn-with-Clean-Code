@@ -8,7 +8,8 @@ from loguru import logger
 
 
 log_level = os.getenv("LOG_LEVEL", "DEBUG").upper()
-log_format = "<green>{time}</green> - <level>{level}</level>: {message}"
+# log_format = "<green>{time}</green> - <level>{level:<7}:</level> {message}"
+log_format = "{time} - {level}: {message}"
 
 logger.remove(handler_id=0)
-logger.add(sink="logs/churn_library.log", format=log_format, level=log_level, colorize=True)
+logger.add(sink="logs/churn_library.log", format=log_format, level=log_level, colorize=False)

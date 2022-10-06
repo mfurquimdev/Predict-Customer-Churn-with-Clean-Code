@@ -13,7 +13,7 @@ It also trains the models and plots the ROC curve to analyze the models' perform
 You should see a structure similar to the following:
 
 ```
-./
+Predict-Customer-Churn-with-Clean-Code/
 ├── data/
 │   └── bank_data.csv
 ├── images/
@@ -27,7 +27,7 @@ You should see a structure similar to the following:
 │       ├── feature_importance.png
 │       ├── logistic_regression_results.png
 │       ├── random_forest_results.png
-│       └── roc_curve.png
+│       └── roc_curve_result.png
 ├── library/
 │   ├── exceptions.py
 │   ├── logger.py
@@ -41,14 +41,20 @@ You should see a structure similar to the following:
 │   ├── lrc.pkl
 │   └── rfc.pkl
 ├── tests/
-│   └── ...
+│   └── data/
+│       └── ...
 ├── churn_library.py
+├── churn_notebook.ipynb
 ├── env.example
+├── Guide.ipynb
+├── hotload_unittest.sh
 ├── Pipfile
 ├── Pipfile.lock
 ├── README.md
 ├── requirements.txt
 └── test_churn_library.py
+
+10 directories, 44 files
 ```
 
 The jupyter notebook was split into a few scripts which resides part on `churn_library.py` and a few auxiliary scripts on `library`.

@@ -20,6 +20,7 @@ from churn_library import perform_eda
 from churn_library import perform_feature_engineering
 from churn_library import train_and_test_prediction
 from churn_library import train_models
+from library import logger
 
 
 class TestImportData:
@@ -28,23 +29,39 @@ class TestImportData:
     @patch.dict(os.environ, {"PATH_TO_DATA_FOLDER": "tests/data"})
     def test_fake_data(self):
         """Test loading a fake csv."""
+        function_name = "import_data"
+        logger.info(f"Test {function_name} with fake data")
 
         csv_name = "fake.csv"
 
         df = import_data(csv_name)
 
-        assert df.shape[0] > 0
-        assert df.shape[1] > 0
+        try:
+            assert df.shape[0] > 0
+            assert df.shape[1] > 0
+            logger.info(f"{function_name} successfully imported fake data")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} could not import fake data")
+            raise exc
 
     @patch.dict(os.environ, {"PATH_TO_DATA_FOLDER": "data"})
     def test_real_data(self):
         """Test loading real csv."""
+        function_name = "import_data"
+        logger.info(f"Test {function_name} with real data")
 
         csv_name = "bank_data.csv"
 
         df = import_data(csv_name)
 
-        assert df.shape == (10127, 23)
+        try:
+            assert df.shape == (10127, 23)
+            logger.info(f"{function_name} successfully imported real data")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} could not import real data")
+            raise exc
 
 
 class TestPerformEDA:
@@ -89,16 +106,30 @@ class TestPerformEDA:
         image_folder,
     ):
         """Test calling plot helpers and creation of image directory."""
+        function_name = "perform_eda"
+        logger.info(f"Test {function_name}")
 
         perform_eda(df)
 
-        assert Path(image_folder).exists()
+        try:
+            assert Path(image_folder).exists()
+            logger.info(f"{function_name} successfully created {image_folder} image folder")
 
-        plot_churn_distribution_mock.assert_called_once_with(df, image_folder)
-        plot_distribution_mock.assert_called_once_with(df, "Customer_Age", image_folder)
-        plot_marital_status_distribution_mock.assert_called_once_with(df, image_folder)
-        plot_total_trans_ct_mock.assert_called_once_with(df, image_folder)
-        plot_correlation_mock.assert_called_once_with(df, image_folder)
+        except AssertionError as exc:
+            logger.error(f"{function_name} have not created {image_folder} image folder")
+            raise exc
+
+        try:
+            plot_churn_distribution_mock.assert_called_once_with(df, image_folder)
+            plot_distribution_mock.assert_called_once_with(df, "Customer_Age", image_folder)
+            plot_marital_status_distribution_mock.assert_called_once_with(df, image_folder)
+            plot_total_trans_ct_mock.assert_called_once_with(df, image_folder)
+            plot_correlation_mock.assert_called_once_with(df, image_folder)
+            logger.info(f"{function_name} successfully called all its functions")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} have not called all its functions")
+            raise exc
 
 
 class TestEncoderHelper:
@@ -122,12 +153,20 @@ class TestEncoderHelper:
 
     def test_encoder_helper(self, df):
         """Test encoding Category1 dummy column."""
+        function_name = "encoder_helper"
+        logger.info("Test {function_name}")
 
         df = encoder_helper(df, ["Category1"])
 
         expected_csv = ",Category1,Churn,Category1_Churn\n0,A,1,0.5\n1,B,1,1.0\n2,A,0,0.5\n3,B,1,1.0\n"
 
-        assert df.to_csv() == expected_csv
+        try:
+            assert df.to_csv() == expected_csv
+            logger.info(f"{function_name} successfully encoded all given features")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not encoded all given features")
+            raise exc
 
 
 class TestPerformFeatureEngineering:
@@ -145,6 +184,8 @@ class TestPerformFeatureEngineering:
     @patch.dict(os.environ, {"RANDOM_STATE": "42", "TEST_SIZE": "0.3"})
     def test_perform_feature_engineering(self, df):
         """Test Perform Feature Engineering function with real DataFrame."""
+        function_name = "perform_feature_engineering"
+        logger.info(f"Test {function_name} with real DataFrame")
 
         test_data_path = Path("tests", "data")
 
@@ -155,10 +196,16 @@ class TestPerformFeatureEngineering:
         expected_y_train = joblib.load(test_data_path.joinpath("y_train.pkl"))
         expected_y_test = joblib.load(test_data_path.joinpath("y_test.pkl"))
 
-        assert expected_X_train.equals(X_train)
-        assert expected_X_test.equals(X_test)
-        assert expected_y_train.equals(y_train)
-        assert expected_y_test.equals(y_test)
+        try:
+            assert expected_X_train.equals(X_train)
+            assert expected_X_test.equals(X_test)
+            assert expected_y_train.equals(y_train)
+            assert expected_y_test.equals(y_test)
+            logger.info(f"{function_name} successfully split test and train data sets")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not split test and train data sets")
+            raise exc
 
 
 class TestClassificationReportImage:
@@ -167,6 +214,9 @@ class TestClassificationReportImage:
     @patch("churn_library.plot_report")
     def test_classification_report_image(self, plot_report_mock):
         """Test calling the two plot report functions."""
+        function_name = "classification_report_image"
+        logger.info(f"Test {function_name}")
+
         test_data_path = Path("tests", "data")
 
         y_train_preds_rf = joblib.load(test_data_path.joinpath("y_train_preds_rf.pkl"))
@@ -207,9 +257,14 @@ class TestClassificationReportImage:
             ),
         ]
 
-        plot_report_mock.assert_has_calls(calls)
+        try:
+            plot_report_mock.assert_has_calls(calls)
 
-        pass
+            logger.info(f"{function_name} successfully called its two plot report functions")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not call its two plot report functions properly")
+            raise exc
 
 
 class TestLoadOrTrainModel:
@@ -238,6 +293,9 @@ class TestLoadOrTrainModel:
         y_train,
     ):
         """Test loading models when pickle files exist."""
+        function_name = "load_or_train_models"
+        logger.info(f"Test {function_name}: loading models")
+
         test_data_path = Path(parameter.get_env("PATH_TO_MODELS"))
         test_data_path.mkdir(parents=True, exist_ok=True)
 
@@ -262,14 +320,32 @@ class TestLoadOrTrainModel:
         lrc_expected = "lrc"
         cv_rfc_expected = "cv_rfc"
 
-        assert rfc_expected == rfc_actual
-        assert lrc_expected == lrc_actual
-        assert cv_rfc_expected == cv_rfc_actual
+        try:
+            assert rfc_expected == rfc_actual
+            assert lrc_expected == lrc_actual
+            assert cv_rfc_expected == cv_rfc_actual
+            logger.info(f"{function_name} returned the correct models")
 
-        joblib_load_mock.assert_has_calls(joblib_load_calls)
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not return the correct models")
+            raise exc
 
-        assert test_data_path.exists()
-        shutil.rmtree(test_data_path, ignore_errors=True)
+        try:
+            joblib_load_mock.assert_has_calls(joblib_load_calls)
+            logger.info(f"{function_name} successfully loaded models with joblib")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not loaded models with joblib")
+            raise exc
+
+        try:
+            assert test_data_path.exists()
+            shutil.rmtree(test_data_path, ignore_errors=True)
+            logger.info(f"{function_name} successfully created {test_data_path} directory")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not create {test_data_path} directory")
+            raise exc
 
     @patch.dict(os.environ, {"PATH_TO_MODELS": "tests/images", "RANDOM_STATE": "42"})
     @patch("churn_library.RandomForestClassifier")
@@ -286,6 +362,9 @@ class TestLoadOrTrainModel:
         y_train,
     ):
         """Test training models when pickle files does not exist."""
+        function_name = "load_or_train_models"
+        logger.info(f"Test {function_name}: training models")
+
         random_state = parameter.get_env("RANDOM_STATE")
         test_data_path = Path(parameter.get_env("PATH_TO_MODELS"))
         test_data_path.mkdir(parents=True, exist_ok=True)
@@ -325,12 +404,38 @@ class TestLoadOrTrainModel:
 
         rfc_actual, lrc_actual, cv_rfc_actual = load_or_train_model(X_train, y_train)
 
-        random_forest_classifier_mock.assert_called_once_with(**random_forest_classifier_call)
-        logistic_regression_mock.assert_called_once_with(**logistic_regression_call)
-        grid_search_cv_mock.assert_called_once_with(**grid_search_cv_call)
+        rfc_expected = rfc_mock
+        lrc_expected = lrc_mock
+        cv_rfc_expected = cv_rfc_mock
 
-        cv_rfc_mock.fit.assert_called_once_with(X_train, y_train)
-        lrc_mock.fit.assert_called_once_with(X_train, y_train)
+        try:
+            assert rfc_expected == rfc_actual
+            assert lrc_expected == lrc_actual
+            assert cv_rfc_expected == cv_rfc_actual
+            logger.info(f"{function_name} successfully returned the trained models")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not return the correct trained models")
+            raise exc
+
+        try:
+            random_forest_classifier_mock.assert_called_once_with(**random_forest_classifier_call)
+            logistic_regression_mock.assert_called_once_with(**logistic_regression_call)
+            grid_search_cv_mock.assert_called_once_with(**grid_search_cv_call)
+            logger.info(f"{function_name} successfully created models")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not create models properly")
+            raise exc
+
+        try:
+            cv_rfc_mock.fit.assert_called_once_with(X_train, y_train)
+            lrc_mock.fit.assert_called_once_with(X_train, y_train)
+            logger.info(f"{function_name} successfully called models training")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not call models training properly")
+            raise exc
 
         joblib_dump_mock.assert_has_calls(joblib_dump_calls)
 
@@ -340,6 +445,8 @@ class TestTrainAndTestPrediction:
 
     def test_train_and_test_prediction_with_fake_data(self):
         """Test model's train and test prediction function"""
+        function_name = "train_and_test_prediction"
+        logger.info(f"Test {function_name} with fake data")
 
         model_mock = MagicMock()
         model_mock.predict.side_effect = ["y_train_preds", "y_test_preds"]
@@ -351,13 +458,25 @@ class TestTrainAndTestPrediction:
 
         y_train_preds_actual, y_test_preds_actual = train_and_test_prediction(model_mock, "X_train", "X_test")
 
-        model_mock.assert_has_calls(model_calls)
+        try:
+            model_mock.assert_has_calls(model_calls)
+            logger.info(f"{function_name} successfully called prediction on train and test data sets")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not properly call prediction on train and test data sets")
+            raise exc
 
         y_train_preds_expected = "y_train_preds"
         y_test_preds_expected = "y_test_preds"
 
-        assert y_train_preds_actual == y_train_preds_expected
-        assert y_test_preds_actual == y_test_preds_expected
+        try:
+            assert y_train_preds_actual == y_train_preds_expected
+            assert y_test_preds_actual == y_test_preds_expected
+            logger.info(f"{function_name} successfully returned train and test prediction")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not return the correct train and test prediction")
+            raise exc
 
 
 class TestTrainModels:
@@ -377,7 +496,10 @@ class TestTrainModels:
         train_and_test_prediction_mock,
         load_or_train_model_mock,
     ):
-        """Test when there is a pickle file of a trained model."""
+        """Test train models with fake data."""
+        function_name = "train_models"
+        logger.info(f"Test {function_name} with fake data")
+
         image_folder = "fake_image_folder"
 
         X_train = "X_train"
@@ -433,15 +555,27 @@ class TestTrainModels:
 
         train_models(X_train, X_test, y_train, y_test)
 
-        load_or_train_model_mock.assert_called_once_with(*load_or_train_model_call)
-        train_and_test_prediction_mock.assert_has_calls(train_and_test_prediction_calls)
-        classification_report_image_mock.assert_called_once_with(*classification_report_image_call)
-        plot_lrc_rfc_roc_curve_mock.assert_called_once_with(*plot_lrc_rfc_roc_curve_call)
-        plot_feature_importance_mock.assert_called_once_with(*plot_feature_importance_call)
+        try:
+            load_or_train_model_mock.assert_called_once_with(*load_or_train_model_call)
+            train_and_test_prediction_mock.assert_has_calls(train_and_test_prediction_calls)
+            classification_report_image_mock.assert_called_once_with(*classification_report_image_call)
+            plot_lrc_rfc_roc_curve_mock.assert_called_once_with(*plot_lrc_rfc_roc_curve_call)
+            plot_feature_importance_mock.assert_called_once_with(*plot_feature_importance_call)
+            logger.info(f"{function_name} successfully called training and plotting functions")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not properly call training and plotting functions")
+            raise exc
 
         image_path = Path(image_folder)
-        assert image_path.exists()
-        shutil.rmtree(image_path, ignore_errors=True)
+        try:
+            assert image_path.exists()
+            shutil.rmtree(image_path, ignore_errors=True)
+            logger.info(f"{function_name} successfully created {image_path} directory")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not create {image_path} directory")
+            raise exc
 
     @patch.dict(os.environ, {"PATH_TO_RESULT_IMAGE_FOLDER": "fake_image_folder"})
     @patch("churn_library.load_or_train_model")
@@ -457,7 +591,10 @@ class TestTrainModels:
         train_and_test_prediction_mock,
         load_or_train_model_mock,
     ):
-        """Test when there is a pickle file of a trained model."""
+        """Test train models with real data."""
+        function_name = "train_models"
+        logger.info(f"Test {function_name} with fake data")
+
         test_data_path = Path("tests", "data")
         image_folder = "fake_image_folder"
 
@@ -514,12 +651,24 @@ class TestTrainModels:
 
         train_models(X_train, X_test, y_train, y_test)
 
-        load_or_train_model_mock.assert_called_once_with(*load_or_train_model_call)
-        train_and_test_prediction_mock.assert_has_calls(train_and_test_prediction_calls)
-        classification_report_image_mock.assert_called_once_with(*classification_report_image_call)
-        plot_lrc_rfc_roc_curve_mock.assert_called_once_with(*plot_lrc_rfc_roc_curve_call)
-        plot_feature_importance_mock.assert_called_once_with(*plot_feature_importance_call)
+        try:
+            load_or_train_model_mock.assert_called_once_with(*load_or_train_model_call)
+            train_and_test_prediction_mock.assert_has_calls(train_and_test_prediction_calls)
+            classification_report_image_mock.assert_called_once_with(*classification_report_image_call)
+            plot_lrc_rfc_roc_curve_mock.assert_called_once_with(*plot_lrc_rfc_roc_curve_call)
+            plot_feature_importance_mock.assert_called_once_with(*plot_feature_importance_call)
+            logger.info(f"{function_name} successfully called training and plotting functions")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not properly call training and plotting functions")
+            raise exc
 
         image_path = Path(image_folder)
-        assert image_path.exists()
-        shutil.rmtree(image_path, ignore_errors=True)
+        try:
+            assert image_path.exists()
+            shutil.rmtree(image_path, ignore_errors=True)
+            logger.info(f"{function_name} successfully created {image_path} directory")
+
+        except AssertionError as exc:
+            logger.error(f"{function_name} did not create {image_path} directory")
+            raise exc

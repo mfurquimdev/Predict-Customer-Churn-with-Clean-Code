@@ -13,41 +13,50 @@ It also trains the models and plots the ROC curve to analyze the models' perform
 You should see a structure similar to the following:
 
 ```
-├── churn_library/
-│   ├── churn_library.py
+./
+├── data/
+│   └── bank_data.csv
+├── images/
+│   ├── eda/
+│   │   ├── churn_distribution.png
+│   │   ├── customer_age_distribution.png
+│   │   ├── heatmap.png
+│   │   ├── marital_status_distribution.png
+│   │   └── total_transaction_distribution.png
+│   └── results/
+│       ├── feature_importance.png
+│       ├── logistic_regression_results.png
+│       ├── random_forest_results.png
+│       └── roc_curve.png
+├── library/
 │   ├── exceptions.py
 │   ├── logger.py
 │   ├── parameter.py
 │   ├── plots.py
 │   └── utils.py
-├── data/
-│   └── bank_data.csv
-├── images/
-│   ├── eda/
-│   │   ├── churn_histogram.png
-│   │   ├── correlation.png
-│   │   ├── Customer_Age_histogram.png
-│   │   ├── marital_status_histogram.png
-│   │   └── total_trans_ct_histogram.png
-│   └── results/
-│       ├── feature_importance.png
-│       ├── Logistic Regression_report.png
-│       ├── Random Forest_report.png
-│       └── roc_curve.png
+├── logs/
+│   └── churn_library.log
 ├── models/
 │   ├── cv_rfc.pkl
 │   ├── lrc.pkl
 │   └── rfc.pkl
 ├── tests/
-└── main.py
+│   └── ...
+├── churn_library.py
+├── env.example
+├── Pipfile
+├── Pipfile.lock
+├── README.md
+├── requirements.txt
+└── test_churn_library.py
 ```
 
-The jupyter notebook was split into a few scripts which resides on `churn_library`.
-The `main.py` script is responsible for importing and executing each function from loading the data set up to training the models.
+The jupyter notebook was split into a few scripts which resides part on `churn_library.py` and a few auxiliary scripts on `library`.
+The `churn_library.py` script has a `main()` function which is responsible for executing each function from loading the data up to training the models.
 The data is stored under `data` with the name `bank_data.csv`.
 All the images are stores in the `images` directory.
 If this script have already been ran, the models as stored under `models`.
-The unit tests are under the `tests` directory.
+The unit tests are inside the ` test_churn_library.py` script.
 
 ## Running Files
 
@@ -68,6 +77,6 @@ After that, you can run the script `execute` under Pipfile by issuing the follow
 pipenv run execute
 ```
 
-This should start the `main.py` script which will load the csv, generate a few EDA plots, train the model and plot the ROC curve.
+This should start the `churn_library.py` script with the `main()` function which will load the csv, generate a few EDA plots, train the model and plot the ROC curve.
 
-Take a look at the plots under `images/eda` and `images/results`.
+Take a look at the log under `logs` and the plots under `images/eda` and `images/results`.

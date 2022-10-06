@@ -11,15 +11,15 @@ import joblib
 import pandas as pd
 import pytest
 
+from churn_library import classification_report_image
 from churn_library import encoder_helper
 from churn_library import import_data
+from churn_library import load_or_train_model
 from churn_library import parameter
 from churn_library import perform_eda
 from churn_library import perform_feature_engineering
+from churn_library import train_and_test_prediction
 from churn_library import train_models
-from churn_library.churn_library import classification_report_image
-from churn_library.churn_library import load_or_train_model
-from churn_library.churn_library import train_and_test_prediction
 
 
 class TestImportData:
@@ -73,11 +73,11 @@ class TestPerformEDA:
         yield image_folder
 
     @patch.dict(os.environ, {"PATH_TO_IMAGE_FOLDER": "tests/images"})
-    @patch("churn_library.churn_library.plot_churn_histogram")
-    @patch("churn_library.churn_library.plot_histogram")
-    @patch("churn_library.churn_library.plot_marital_status_histogram")
-    @patch("churn_library.churn_library.plot_total_trans_ct")
-    @patch("churn_library.churn_library.plot_correlation")
+    @patch("churn_library.plot_churn_histogram")
+    @patch("churn_library.plot_histogram")
+    @patch("churn_library.plot_marital_status_histogram")
+    @patch("churn_library.plot_total_trans_ct")
+    @patch("churn_library.plot_correlation")
     def test_perform_eda(
         self,
         plot_correlation_mock,
@@ -164,7 +164,7 @@ class TestPerformFeatureEngineering:
 class TestClassificationReportImage:
     """Test the production of classification report image for training and test results"""
 
-    @patch("churn_library.churn_library.plot_report")
+    @patch("churn_library.plot_report")
     def test_classification_report_image(self, plot_report_mock):
         """Test calling the two plot report functions."""
         test_data_path = Path("tests", "data")
@@ -230,7 +230,7 @@ class TestLoadOrTrainModel:
         yield joblib.load(test_data_path.joinpath("y_train.pkl"))
 
     @patch.dict(os.environ, {"PATH_TO_MODELS": "fake_path_to_models"})
-    @patch("churn_library.churn_library.joblib.load")
+    @patch("churn_library.joblib.load")
     def test_loading_models(
         self,
         joblib_load_mock,
@@ -272,10 +272,10 @@ class TestLoadOrTrainModel:
         shutil.rmtree(test_data_path, ignore_errors=True)
 
     @patch.dict(os.environ, {"PATH_TO_MODELS": "fake_path_to_models", "RANDOM_STATE": "42"})
-    @patch("churn_library.churn_library.RandomForestClassifier")
-    @patch("churn_library.churn_library.LogisticRegression")
-    @patch("churn_library.churn_library.GridSearchCV")
-    @patch("churn_library.churn_library.joblib.dump")
+    @patch("churn_library.RandomForestClassifier")
+    @patch("churn_library.LogisticRegression")
+    @patch("churn_library.GridSearchCV")
+    @patch("churn_library.joblib.dump")
     def test_training_models(
         self,
         joblib_dump_mock,
@@ -364,11 +364,11 @@ class TestTrainModels:
     """Test Train models."""
 
     @patch.dict(os.environ, {"PATH_TO_RESULT_IMAGE_FOLDER": "fake_image_folder"})
-    @patch("churn_library.churn_library.load_or_train_model")
-    @patch("churn_library.churn_library.train_and_test_prediction")
-    @patch("churn_library.churn_library.classification_report_image")
-    @patch("churn_library.churn_library.plot_lrc_rfc_roc_curve")
-    @patch("churn_library.churn_library.plot_feature_importance")
+    @patch("churn_library.load_or_train_model")
+    @patch("churn_library.train_and_test_prediction")
+    @patch("churn_library.classification_report_image")
+    @patch("churn_library.plot_lrc_rfc_roc_curve")
+    @patch("churn_library.plot_feature_importance")
     def test_train_models_with_fake_data(
         self,
         plot_feature_importance_mock,
@@ -444,11 +444,11 @@ class TestTrainModels:
         shutil.rmtree(image_path, ignore_errors=True)
 
     @patch.dict(os.environ, {"PATH_TO_RESULT_IMAGE_FOLDER": "fake_image_folder"})
-    @patch("churn_library.churn_library.load_or_train_model")
-    @patch("churn_library.churn_library.train_and_test_prediction")
-    @patch("churn_library.churn_library.classification_report_image")
-    @patch("churn_library.churn_library.plot_lrc_rfc_roc_curve")
-    @patch("churn_library.churn_library.plot_feature_importance")
+    @patch("churn_library.load_or_train_model")
+    @patch("churn_library.train_and_test_prediction")
+    @patch("churn_library.classification_report_image")
+    @patch("churn_library.plot_lrc_rfc_roc_curve")
+    @patch("churn_library.plot_feature_importance")
     def test_train_models(
         self,
         plot_feature_importance_mock,

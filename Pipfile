@@ -21,6 +21,6 @@ ipykernel = "*"
 python_version = "3.8"
 
 [scripts]
-unittests = "pytest -s -vv --disable-warnings --capture=no --log-cli-level=INFO --failed-first -x --cov-report term-missing --cov=. tests"
+unittests = "pytest -s -vv --disable-warnings --capture=no --log-cli-level=INFO --failed-first -x --cov-report term-missing --cov=. test_churn_library.py"
 format = "black --target-version=py38 ."
-execute = "python main.py"
+execute = "python churn_library.py"

@@ -21,7 +21,7 @@ You should see a structure similar to the following:
 │   ├── plots.py
 │   └── utils.py
 ├── data/
-│   └── BankChurners.csv
+│   └── bank_data.csv
 ├── images/
 │   ├── eda/
 │   │   ├── churn_histogram.png
@@ -44,7 +44,7 @@ You should see a structure similar to the following:
 
 The jupyter notebook was split into a few scripts which resides on `churn_library`.
 The `main.py` script is responsible for importing and executing each function from loading the data set up to training the models.
-The data is stored under `data` with the name `BankChurners.csv`.
+The data is stored under `data` with the name `bank_data.csv`.
 All the images are stores in the `images` directory.
 If this script have already been ran, the models as stored under `models`.
 The unit tests are under the `tests` directory.

@@ -1,9 +1,12 @@
-"""Core of the library to predict clients who are likely to churn."""
+"""Main script to execute the library to predict clients who are likely to churn."""
 import os
 from pathlib import Path
 
 import joblib
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+import seaborn as sns
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.externals import joblib
 from sklearn.linear_model import LogisticRegression
@@ -11,17 +14,46 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import normalize
 
-from . import parameter
-from .logger import logger
-from .plots import plot_churn_histogram
-from .plots import plot_correlation
-from .plots import plot_feature_importance
-from .plots import plot_histogram
-from .plots import plot_lrc_rfc_roc_curve
-from .plots import plot_marital_status_histogram
-from .plots import plot_report
-from .plots import plot_total_trans_ct
-from .utils import display_info
+from library import logger
+from library import parameter
+from library.plots import plot_churn_histogram
+from library.plots import plot_correlation
+from library.plots import plot_feature_importance
+from library.plots import plot_histogram
+from library.plots import plot_lrc_rfc_roc_curve
+from library.plots import plot_marital_status_histogram
+from library.plots import plot_report
+from library.plots import plot_total_trans_ct
+from library.utils import display_info
+
+
+def main():
+    """Main function when the library is issued via command line"""
+
+    sns.set()
+    plt.style.use("ggplot")
+
+    np_seed = parameter.get_env("NP_SEED")
+    np.random.seed(np_seed)
+
+    csv_name = "bank_data.csv"
+    df = import_data(csv_name)
+
+    perform_eda(df)
+
+    category_list = [
+        "Gender",
+        "Education_Level",
+        "Marital_Status",
+        "Income_Category",
+        "Card_Category",
+    ]
+
+    df = encoder_helper(df, category_list)
+
+    X_train, X_test, y_train, y_test = perform_feature_engineering(df)
+
+    train_models(X_train, X_test, y_train, y_test)
 
 
 @display_info
@@ -323,4 +355,7 @@ def train_models(
 
     plot_lrc_rfc_roc_curve(image_folder, lrc, cv_rfc.best_estimator_, X_test, y_test)
     plot_feature_importance(cv_rfc, X_test, image_folder)
-    # explainer_plot(cv_rfc, X_test, image_folder)
+
+
+if __name__ == "__main__":
+    main()
